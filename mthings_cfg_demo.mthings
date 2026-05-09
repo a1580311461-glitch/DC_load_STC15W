@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<MThings fwpath="">
+	<PORT_LIST>
+		<COM Name="COM9" Remarks="" Baund="9600" Parity="0" StopBit="0" DataBit="0" FlowCtrl="0" DTR="0" TransMode="0" CharType="0" BreakTime="10" />
+		<COM Name="COM11" Remarks="PL2303" Baund="9600" Parity="0" StopBit="0" DataBit="0" FlowCtrl="0" DTR="0" TransMode="0" CharType="0" BreakTime="10" />
+	</PORT_LIST>
+	<SIGNT SYS_DATA="" ALARM="" HISDATA="" />
+	<MQTT />
+	<CURVE />
+	<HISDATA />
+	<ALARM_LIST>
+		<TYPELIST />
+	</ALARM_LIST>
+	<SYS_DATA>
+		<PAGE ID="1" Name="HOME" width="1920" hight="1080" BackColor="#FFFFFFFF" PicPath="" />
+	</SYS_DATA>
+	<DEVICE_LIST>
+		<DEVICE ID="1" Name="[M]COM11-电子直流负载-021" DeviceType="1" BindMode="0" BindDeviceID="0" Addr="21" mr_reg="125" mr_bit="2000" p_invl="0" btime="0" AddrUIMode="0" CRCByteOder="1" BlockBitOder="0" AddrOffset="0" PackWay="1" BitGap="0" RegGap="5" OneReg10="0" OneCoil0F="0" BCast1="0" BCast2="0" IsBCDevice="0" BathReadMode="0" cGp="">
+			<PORTS>
+				<port Name="COM11" />
+			</PORTS>
+			<GROUPS />
+			<SELF_LIST />
+			<DATA_LIST>
+				<DATA ID="1" Name="设备地址" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="--" ShowType="0" Addr="0" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="21" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="2" Name="工作模式（0-CC, 1-CR, 3-CP）" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="--" ShowType="0" Addr="1" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="1" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="3" Name="设定电流" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="mA" ShowType="0" Addr="2" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="100-最大电流" CmdValue="1000" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="4" Name="设定电阻" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="mΩ" ShowType="0" Addr="3" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="4000" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="5" Name="设定功率" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="mW" ShowType="0" Addr="4" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="2500" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="6" Name="最大电流" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="mA" ShowType="0" Addr="5" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="3000" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="7" Name="最大电压" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="mV" ShowType="0" Addr="6" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="5500" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="8" Name="最大温度" BLOCK="2" PrtcTYPE="1" PointNum="1" Unit="℃" ShowType="0" Addr="7" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="50.0" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="9" Name="实时电压" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="mV" ShowType="0" Addr="4096" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="10" Name="实时电流" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="mA" ShowType="0" Addr="4097" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="11" Name="实时温度" BLOCK="2" PrtcTYPE="1" PointNum="1" Unit="摄氏度" ShowType="0" Addr="4098" Gain="0.01" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="12" Name="输出状态（0-OFF, 1-ON）" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="--" ShowType="0" Addr="4099" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="1" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="13" Name="过压标志（0-NORMAL, 1-ERR）" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="--" ShowType="0" Addr="4100" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="1" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="14" Name="过温标志（0-NORMAL, 1-ERR）" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="--" ShowType="0" Addr="4101" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="1" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+			</DATA_LIST>
+		</DEVICE>
+	</DEVICE_LIST>
+</MThings>

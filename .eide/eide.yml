@@ -1,0 +1,76 @@
+version: "4.1"
+name: DC_load_STC15W
+type: C51
+deviceName: null
+packDir: null
+srcDirs: []
+virtualFolder:
+  name: <virtual_root>
+  files: []
+  folders:
+    - name: AiCube
+      files:
+        - path: Sources/main.c
+        - path: Sources/port.c
+        - path: Sources/clock.c
+        - path: Sources/iap.c
+        - path: Sources/timer.c
+        - path: Sources/uart.c
+        - path: Sources/adc.c
+        - path: Sources/pwm.c
+      folders: []
+    - name: User Sources
+      files:
+        - path: Sources/control.c
+        - path: Sources/display.c
+        - path: Sources/key.c
+        - path: Sources/ntc.c
+        - path: Sources/oled.c
+        - path: Sources/oledfont.c
+        - path: Sources/settings.c
+        - path: Sources/modbus.c
+        - path: Sources/buzzer.c
+      folders: []
+dependenceList: []
+outDir: build
+miscInfo:
+  uid: 145d56fb620cd3916a7bf1470a062ec9
+targets:
+  DC_load_STC15W:
+    cppPreprocessAttrs:
+      defineList: []
+      incList:
+        - ../../Keil_v5/C51/INC/STC
+        - Sources/inc
+      libList: []
+    excludeList: []
+    settings: {}
+    toolchain: Keil_C51
+    toolchainConfigMap:
+      Keil_C51:
+        options:
+          version: 2
+          afterBuildTasks: []
+          asm-compiler: {}
+          beforeBuildTasks: []
+          c/cpp-compiler:
+            optimization-level: level-8
+            optimization-type: SPEED
+          global:
+            ram-mode: SMALL
+            rom-mode: LARGE
+          linker:
+            misc-controls: ""
+            output-format: elf
+            remove-unused: true
+    uploadConfigMap:
+      Custom:
+        bin: ""
+        commandLine: ""
+        eraseChipCommand: ""
+      stcgal:
+        bin: ""
+        eepromImgPath: "null"
+        extraOptions: ""
+        options: .eide/stc.flash.json
+    uploader: stcgal
