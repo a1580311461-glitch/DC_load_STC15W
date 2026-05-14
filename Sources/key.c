@@ -1,91 +1,99 @@
 #include "config.h"
 
 
-// °´¼ü²ÎÊıÅäÖÃÊı×é£ºË³ĞòÒÀ´ÎÎª MODE(0), INC(1), DEC(2), ONOFF(3)
-const uint8_t KeyLongPressMIN[KEY_NUM]   = {50, 0, 0, 0};          // ³¤°´ãĞÖµ£¬0Îª½ûÓÃ
-const uint8_t KeyRepeatPressMIN[KEY_NUM] = {255, 10, 10, 255};    // Á¬°´ãĞÖµ£¬255Îª½ûÓÃ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½é£ºË³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª MODE(0), INC(1), DEC(2), ONOFF(3)
+const uint8_t KeyLongPressMIN[KEY_NUM]   = {50, 0, 0, 0};          // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½0Îªï¿½ï¿½ï¿½ï¿½
+const uint8_t KeyRepeatPressMIN[KEY_NUM] = {255, 10, 10, 255};    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½255Îªï¿½ï¿½ï¿½ï¿½
 
-// ÄÚ²¿×´Ì¬»úÄÚ´æ·ÖÅä
+// ï¿½Ú²ï¿½×´Ì¬ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½
 static uint8_t mKeySwapTask[KEY_NUM] = {0};
 static uint8_t mKeyLongPressCNT[KEY_NUM] = {0};
 static uint8_t mKeyRepeatPressCNT[KEY_NUM] = {0};
+static uint8_t mFirstDown[KEY_NUM] = {1,1,1,1};  // é¦–æ¬¡æŒ‰ä¸‹æ ‡è®°ï¼Œç”¨äºèœ‚é¸£å™¨å•æ¬¡è§¦å‘
 
 
 /*
- * @brief   °´¼ü×´Ì¬»úÉ¨ÃèÈÎÎñ
- * @note    ½¨Òé·ÅÈë 10ms µÄ¶¨Ê±Æ÷±êÖ¾Î»ÖĞÂÖÑ¯
+ * @brief   ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½É¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * @note    ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 10ms ï¿½Ä¶ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ö¾Î»ï¿½ï¿½ï¿½ï¿½Ñ¯
  */
 void Key_Task(void)
 {
     uint8_t i;
     uint8_t key_level[KEY_NUM];
 
-    // »ñÈ¡ËùÓĞÎïÀí°´¼üµÄµ±Ç°µçÆ½ (0Îª°´ÏÂ£¬1ÎªÊÍ·Å)
+    // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½Ç°ï¿½ï¿½Æ½ (0Îªï¿½ï¿½ï¿½Â£ï¿½1Îªï¿½Í·ï¿½)
     key_level[KEY_ID_MODE]  = KEY_MODE;
     key_level[KEY_ID_INC]   = KEY_INC;
     key_level[KEY_ID_DEC]   = KEY_DEC;
     key_level[KEY_ID_ONOFF] = KEY_ON_OFF;
 
-    // ×´Ì¬»úÂÖÑ¯´¦Àí
+    // ×´Ì¬ï¿½ï¿½ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½
     for (i = 0; i < KEY_NUM; i++)
     {
         switch (mKeySwapTask[i])
         {
-            case 0:  // ¼ì²âÊÇ·ñÓĞ°´ÏÂ
+            case 0:  // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ğ°ï¿½ï¿½ï¿½
+                mFirstDown[i] = 1;  // ä¸ºä¸‹ä¸€æ¬¡æŒ‰é”®é‡ç½®é¦–æ¬¡æŒ‰ä¸‹æ ‡è®°
                 if (key_level[i] == 0) mKeySwapTask[i] = 1;
                 break;
 
-            case 1:  // °´ÏÂÈ¥¶¶ÑÓÊ±
+            case 1:  // ï¿½ï¿½ï¿½ï¿½È¥ï¿½ï¿½ï¿½ï¿½Ê±
                 mKeySwapTask[i] = 2;
                 break;
 
-            case 2:  // È·ÈÏ°´ÏÂ
+            case 2:  // È·ï¿½Ï°ï¿½ï¿½ï¿½
                 if (key_level[i] == 0) {
-                    Key_Event_Handler((KeyID_e)i, KEY_EVENT_DOWN); // ´¥·¢¡¾°´ÏÂÊÂ¼ş¡¿
+                    if (mFirstDown[i]) {
+                    mFirstDown[i] = 0;
+                    Buzzer_KeyBeep();
+                    }
+                    Key_Event_Handler((KeyID_e)i, KEY_EVENT_DOWN); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½
                     mKeyLongPressCNT[i] = 0;
                     mKeyRepeatPressCNT[i] = 0;
                     mKeySwapTask[i] = 3;
                 } else {
-                    mKeySwapTask[i] = 0; // ¶¶¶¯£¬¸´Î»
-                }
+                    mKeySwapTask[i] = 0; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»
+                    }
                 break;
 
-            case 3:  // ¼ì²â°´×¡ÓëËÉ¿ª
+            case 3:  // ï¿½ï¿½â°´×¡ï¿½ï¿½ï¿½É¿ï¿½
                 if (key_level[i] == 1) {
-                    mKeySwapTask[i] = 4; // °´¼üËÉ¿ª£¬½øÈëÊÍ·ÅÈ¥¶¶
-                }
+                    mKeySwapTask[i] = 4; // ï¿½ï¿½ï¿½ï¿½ï¿½É¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½È¥ï¿½ï¿½
+                    }
 
-                // ³¤°´¼ì²â
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 if (KeyLongPressMIN[i] > 0 && mKeyLongPressCNT[i] < KeyLongPressMIN[i]) {
                     mKeyLongPressCNT[i]++;
                     if (mKeyLongPressCNT[i] == KeyLongPressMIN[i]) {
-                        Key_Event_Handler((KeyID_e)i, KEY_EVENT_LONG); // ´¥·¢¡¾³¤°´ÊÂ¼ş¡¿
+                            Buzzer_KeyBeep();
+                    Key_Event_Handler((KeyID_e)i, KEY_EVENT_LONG); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½
                     }
-                }
+                    }
 
-                // Á¬°´¼ì²â
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 if (KeyRepeatPressMIN[i] < 255) {
                     mKeyRepeatPressCNT[i]++;
                     if (mKeyRepeatPressCNT[i] == KeyRepeatPressMIN[i]) {
-                        Key_Event_Handler((KeyID_e)i, KEY_EVENT_REPEAT); // ´¥·¢¡¾Á¬°´ÊÂ¼ş¡¿
+                        Buzzer_ShortTick();
+                    Key_Event_Handler((KeyID_e)i, KEY_EVENT_REPEAT); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½
                     }
                     if (mKeyRepeatPressCNT[i] > KeyRepeatPressMIN[i]) {
-                        mKeySwapTask[i] = 2; // »ØÍË×´Ì¬£¬¿ªÆôÏÂÒ»´ÎÁ¬»÷Ñ­»·
+                        mKeySwapTask[i] = 2; // ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½
                     }
-                }
+                    }
                 break;
 
-            case 4:  // ÊÍ·ÅÈ¥¶¶ÑÓÊ±
+            case 4:  // ï¿½Í·ï¿½È¥ï¿½ï¿½ï¿½ï¿½Ê±
                 mKeySwapTask[i] = 5;
                 break;
 
-            case 5:  // È·ÈÏÊÍ·Å
+            case 5:  // È·ï¿½ï¿½ï¿½Í·ï¿½
                 if (key_level[i] == 1) {
-                    Key_Event_Handler((KeyID_e)i, KEY_EVENT_UP); // ´¥·¢¡¾ÊÍ·ÅÊÂ¼ş¡¿
+                    Key_Event_Handler((KeyID_e)i, KEY_EVENT_UP); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½Â¼ï¿½ï¿½ï¿½
                     mKeySwapTask[i] = 0;
                 } else {
-                    mKeySwapTask[i] = 3; // ¶¶¶¯£¬ÍË»Ø°´×¡×´Ì¬
-                }
+                    mKeySwapTask[i] = 3; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë»Ø°ï¿½×¡×´Ì¬
+                    }
                 break;
 
             default:

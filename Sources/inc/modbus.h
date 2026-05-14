@@ -10,7 +10,6 @@
 
 
 // MODBUS寄存器地址宏
-
 // 读写区
 #define MODBUS_REG_DEVICE_ADDR        0x0000    // 设备地址（R/W, 0-247）
 #define MODBUS_REG_WORK_MODE          0x0001    // 工作模式（R/W, 0=CC, 1=CR, 2=CP）
@@ -28,6 +27,7 @@
 #define MODBUS_REG_OUTPUT_STATE           0x1003   // 输出状态（R, 0=OFF, 1=ON）
 #define MODBUS_REG_OVERVOLTAGE_FLAG       0x1004   // 过压标志（R, 0=未触发, 1=触发）
 #define MODBUS_REG_OVERTEMP_FLAG          0x1005   // 过热标志（R, 0=未触发, 1=触发）
+#define MODBUS_REG_BOOT_COUNT             0x1006   // 启动次数（R, 0-65535）
 
 
 // MODBUS帧缓冲区大小

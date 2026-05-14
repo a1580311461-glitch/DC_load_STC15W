@@ -45,6 +45,8 @@ static uint16_t Modbus_ReadRegister(uint16_t addr) {
             return sys_ui.ui_data.is_over_voltage;
         case MODBUS_REG_OVERTEMP_FLAG: 
             return sys_ui.ui_data.is_over_temperature;
+        case MODBUS_REG_BOOT_COUNT:
+            return sys_ui.ui_data.boot_count;
         default: 
             return 0xFFFF; // 非法地址返回0xFFFF
     }
@@ -68,8 +70,8 @@ static uint8_t Modbus_WriteRegister(uint16_t addr, uint16_t value) {
             } else {
                 return 0; 
             }
-        case MODBUS_REG_SETTING_CURRENT: 
-            if (value <= sys_ui.ui_data.max_current_mA && value >= 100) { // 限幅到 100mA - 3000mA
+        case MODBUS_REG_SETTING_CURRENT:
+            if (value <= sys_ui.ui_data.max_current_mA) {
                 sys_ui.ui_data.setting_current_mA = value;
                 return 1;
             } else {
@@ -93,9 +95,11 @@ static uint8_t Modbus_WriteRegister(uint16_t addr, uint16_t value) {
         case MODBUS_REG_OUTPUT_STATE:
             if (value == 0) {
                 OUTPUT_EN_OFF();
+                LED_OUT_OFF(); // 同步关闭LED指示
                 return 1;
             } else if (value == 1) {
                 OUTPUT_EN_ON();
+                LED_OUT_ON(); // 同步打开LED指示
                 return 1;
             } else {
                 return 0;
@@ -108,7 +112,7 @@ static uint8_t Modbus_WriteRegister(uint16_t addr, uint16_t value) {
 
 // 发送正常响应函数
 static void Modbus_SendResponse(uint8_t len) {
-    P04 = !P04;         // ← 加这行：发送前翻转 485 指示灯
+    LED_485_TOGGLE();         // 发送前翻转 485 指示灯
     RS485_SET_TX();
     UART3_SendBuffer(u8TxBuffer, len);
     while (fUART3SendBusy); // 等最后一字节硬件发完
@@ -154,7 +158,7 @@ static void Modbus_ReadHoldingRegisters(void) {
     if (start_addr >= 0x0000 && end_addr <= 0x0007) {
         addr_valid = 1;  // R/W 区
     }
-    else if (start_addr >= 0x1000 && end_addr <= 0x1005) {
+    else if (start_addr >= 0x1000 && end_addr <= 0x1006) {
         addr_valid = 1;  // R/O 区
     }
 
@@ -294,6 +298,7 @@ static void Modbus_ProcessFrame(void) {
 
 // Modbus 初始化函数
 void Modbus_Init(void) {
+    LED_485_OFF(); // 初始状态 485 指示灯灭
     u16ModbusTimer = Get_SysTick();  // 初始化时间戳
     u8UART3RxCount = 0;             // 清空接收计数
     fUART3ReadyRead = 0;            // 清空标志

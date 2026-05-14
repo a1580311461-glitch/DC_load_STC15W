@@ -23,6 +23,7 @@
 
 static uint16_t s_last_time_key = 0;  // 锟较达拷扫锟借按锟斤拷锟斤拷系统时锟戒，锟斤拷位为ms
 static uint16_t s_last_time_100ms = 0; // 锟较达拷执锟斤拷100ms锟斤拷锟斤拷锟较低呈憋拷洌?锟斤拷位为ms
+static uint8_t s_eeprom_save_pending = 1; // EEPROM 延迟保存待处理标志
 uint16_t current_time;
 
 //<<AICUBE_USER_GLOBAL_DEFINE_END>>
@@ -73,9 +74,15 @@ void main(void)
             sys_ui.ui_data.real_time_voltage_mV = Voltage_Control_GetActualVoltage_mV();
             sys_ui.ui_data.real_time_temperature_C = Temperature_Control_GetActualTemperaturex100();
 
-            // Control_Protect(); // 执行保护逻辑
+            Control_Protect(); // 执行保护逻辑 + 风扇调速
             Control_Tick(); // 执行控制逻辑
             UI_Task();  // 刷新显示
+
+            // 开机1秒后延迟保存EEPROM（避开启动时电源不稳定窗口）
+            if (s_eeprom_save_pending && current_time > 1000) {
+                s_eeprom_save_pending = 0;
+                EEPROM_DelayedSave();
+            }
         }
 
         //<<AICUBE_USER_MAIN_LOOP_END>>
@@ -109,9 +116,9 @@ void SYS_Init(void)
     PORT2_Init();                       //P2口初始化
     PORT3_Init();                       //P3口初始化
     CLK_Init();                         //时钟模块初始化
-    IAP_Init();                         //EEPROM初始化
     TIMER0_Init();                      //定时器0初始化
     TIMER1_Init();                      //定时器1初始化
+    TIMER4_Init();                      //定时器4初始化
     UART1_Init();                       //串口1初始化
     UART3_Init();                       //串口3初始化
     ADC_Init();                         //ADC初始化
@@ -122,13 +129,15 @@ void SYS_Init(void)
 	
     Current_Control_Init();                    // 初始化电流控制模块
 
+    Fan_Init();                                // 初始化风扇软件PWM
+
 	OLED_Init();
 
     Buzzer_Init();
 	
     UI_Init();
     
-    Settings_Load();                    // 加载设置，成功返回1，失败使用默认值返回0
+    EEPROM_Restore();                    // 从EEPROM加载参数（掉电保护恢复）
 
     Modbus_Init();
 

@@ -13,7 +13,6 @@ virtualFolder:
         - path: Sources/main.c
         - path: Sources/port.c
         - path: Sources/clock.c
-        - path: Sources/iap.c
         - path: Sources/timer.c
         - path: Sources/uart.c
         - path: Sources/adc.c
@@ -27,9 +26,10 @@ virtualFolder:
         - path: Sources/ntc.c
         - path: Sources/oled.c
         - path: Sources/oledfont.c
-        - path: Sources/settings.c
         - path: Sources/modbus.c
         - path: Sources/buzzer.c
+        - path: Sources/fan.c
+        - path: Sources/eeprom.c
       folders: []
 dependenceList: []
 outDir: build

@@ -13,6 +13,18 @@
 //<<AICUBE_USER_DEFINE_BEGIN>>
 // 锟节达拷锟斤拷锟斤拷锟矫伙拷锟疥定锟斤拷  
 
+/* 指示灯控制宏 */
+#define LED_ERR_ON()       do { P26 = 0; } while(0) // 错误指示灯亮
+#define LED_ERR_OFF()      do { P26 = 1; } while(0) // 错误指示灯灭
+#define LED_ERR_TOGGLE()   do { P26 = !P26; } while(0) // 错误指示灯翻转
+#define LED_OUT_ON()       do { P27 = 0; } while(0) // 输出指示灯亮
+#define LED_OUT_OFF()      do { P27 = 1; } while(0) // 输出指示灯灭
+#define LED_OUT_TOGGLE()   do { P27 = !P27; } while(0) // 输出指示灯翻转
+#define LED_485_ON()       do { P04 = 0; } while(0) // 485 指示灯亮
+#define LED_485_OFF()      do { P04 = 1; } while(0) // 485 指示灯灭
+#define LED_485_TOGGLE()   do { P04 = !P04; } while(0) // 485 指示灯翻转
+
+
 /* OUTPUT_EN 控制宏 — 用软件变量跟踪状态，开漏模式下读引脚不可靠 */
 extern unsigned char output_en_state;
 #define OUTPUT_EN_ON()      do { OUTPUT_EN = 1; output_en_state = 1; } while(0)
@@ -56,9 +68,10 @@ extern unsigned char output_en_state;
 #include "display.h"
 #include "control.h"
 #include "ntc.h"
-#include "settings.h"
+#include "eeprom.h"
 #include "modbus.h"
 #include "buzzer.h"
+#include "fan.h"
 
 //<<AICUBE_USER_INCLUDE_END>>
 
@@ -77,7 +90,7 @@ extern unsigned char output_en_state;
 #define PWM_IN                  P37
 #define OLED_SDIN               P20
 #define OLED_SCL                P21
-#define PWM_FAN                 P22
+#define FAN                     P22
 #define LED_ERR                 P26
 #define LED_OUT                 P27
 #define RxD3                    P00
@@ -87,7 +100,6 @@ extern unsigned char output_en_state;
 
 #include "port.h"
 #include "clock.h"
-#include "iap.h"
 #include "timer.h"
 #include "uart.h"
 #include "adc.h"

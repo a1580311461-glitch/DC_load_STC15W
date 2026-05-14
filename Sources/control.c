@@ -1,14 +1,20 @@
 #include "config.h"
 
+// 风扇软件PWM阈值（基于 FAN_PWM_PERIOD=10 的0~10刻度）
+#define FAN_DUTY_ON    3       // 最低启动占空比 ≈ 30%
+
 uint8_t output_en_state = 0;  // 软件跟踪OUTPUT_EN状态（P33开漏模式，读引脚不可靠）
-static uint16_t s_last_vcc_mv = 0;
-static uint16_t s_current_pwm_duty = 0;
-static uint16_t s_target_pwm_duty = 0;
-static uint8_t s_stepping_active = 0;
+static uint16_t xdata s_last_vcc_mv = 0;
+static uint16_t xdata s_current_pwm_duty = 0;
+static uint16_t xdata s_target_pwm_duty = 0;
+static uint8_t xdata s_stepping_active = 0;
+static uint16_t xdata s_closed_loop_target_mA = 0; // CR/CP闭环微调的目标电流
+static uint8_t xdata s_fan_active = 0;             // 风扇迟滞状态跟踪
 
 void Current_Control_Init(void)
 {
     OUTPUT_EN_OFF(); // 初始关闭mosfet驱动输出
+    LED_OUT_OFF(); // 初始状态输出指示灯灭
 
     s_current_pwm_duty = 100;          // 初始化当前占空比为100
     PWM2_SetWidth(s_current_pwm_duty); // 设置初始占空比
@@ -78,11 +84,11 @@ void Current_Control_Tick(void)
         return;
     }
 
-// 增量闭环微调
+// 增量闭环微调（使用 s_closed_loop_target_mA，支持 CR/CP 模式）
 #define CFG_DEADBAND_MA 10 // ±10mA 死区
 
     actual_mA = Current_Control_GetActualCurrent_mA();
-    error = (int16_t)sys_ui.ui_data.setting_current_mA - (int16_t)actual_mA;
+    error = (int16_t)s_closed_loop_target_mA - (int16_t)actual_mA;
 
     if (error > CFG_DEADBAND_MA)
     {
@@ -164,9 +170,14 @@ void Control_Tick(void)
     // 统一限幅到 max_current_mA
     if (target_current_mA > sys_ui.ui_data.max_current_mA)
         target_current_mA = sys_ui.ui_data.max_current_mA;
-    
-    Current_Control_SetTarget(target_current_mA); // 走现有步进+闭环
-    Current_Control_Tick();                       // 执行 PWM 调节
+
+    s_closed_loop_target_mA = target_current_mA;       // 保存给闭环微调用（CR/CP模式依赖此值）
+    Current_Control_SetTarget(target_current_mA);       // 计算目标占空比（即使输出关闭也计算，以便打开时步进起点正确）
+
+    // 输出关闭时不执行 PWM 步进和闭环微调，防止闭环读到 actual=0 误增占空比
+    if (OUTPUT_EN_IS_ON) {
+        Current_Control_Tick();                         // 执行 PWM 调节
+    }
 }
 
 
@@ -181,6 +192,8 @@ void Control_Protect(void)
     {
         sys_ui.ui_data.is_over_voltage = 1;
         OUTPUT_EN_OFF();
+        LED_ERR_ON(); // 过压时点亮错误指示灯
+        LED_OUT_OFF(); // 过压时关闭输出指示灯
         Buzzer_SetAlarm(1);
         PWM2_SetWidth(0);
         return;
@@ -191,50 +204,68 @@ void Control_Protect(void)
     {
         sys_ui.ui_data.is_over_temperature = 1;
         OUTPUT_EN_OFF();            // 关闭输出
+        LED_ERR_ON(); // 过温时点亮错误指示灯
+        LED_OUT_OFF(); // 过温时关闭输出指示灯
         Buzzer_SetAlarm(1);
-        PWM4_SetWidth(MAX_PWM_DUTY); // 风扇满速降温
+        Fan_SetDuty(FAN_DUTY_MAX);   // 风扇满速降温
         return;
     }
 
-    // === 风扇控制：启动 + 动态调速 ===
-    #define FAN_ON_TEMP_C   50      // 风扇启动温度阈值 (°C)
-    #define FAN_MIN_DUTY    300     // 最低转速占空比 (0~1000)
+    // === 风扇控制：温度/电流联合启停 + 动态调速（迟滞防抖） ===
+    #define FAN_ON_TEMP_C       35      // 风扇启动温度阈值 (°C)
+    #define FAN_OFF_TEMP_C      30      // 风扇关断温度迟滞 (°C)
+    #define FAN_ON_CURRENT_MA   1000    // 风扇启动电流阈值 (mA)
+    #define FAN_OFF_CURRENT_MA  300     // 风扇关断电流迟滞 (mA)
 
     {
-        uint16_t fan_duty = 0;
+        uint8_t fan_duty = 0;
 
-        // 条件：电流≥1A 或 温度≥50°C
-        if (current_mA >= 1000 || temp_C >= FAN_ON_TEMP_C)
-        {
-            uint16_t speed_by_temp = 0;
-            uint16_t speed_by_power = 0;
-
-            // 温度分量：50°C→FAN_MIN_DUTY(300), max_temperature_C→MAX_PWM_DUTY(1000)
-            if (temp_C > FAN_ON_TEMP_C)
-            {
-                speed_by_temp = FAN_MIN_DUTY
-                    + (uint32_t)(temp_C - FAN_ON_TEMP_C)
-                    * (MAX_PWM_DUTY - FAN_MIN_DUTY)
-                    / (sys_ui.ui_data.max_temperature_C - FAN_ON_TEMP_C);
+        if (s_fan_active) {
+            // 风扇已运行：两个条件都低于迟滞阈值才关闭
+            if (temp_C >= FAN_OFF_TEMP_C || current_mA >= FAN_OFF_CURRENT_MA) {
+                goto calc_fan_speed;
+            } else {
+                s_fan_active = 0;
             }
-
-            // 功率分量：实际功率/最大功率 × MAX_PWM_DUTY
-            {
-                uint32_t power_mW = (uint32_t)current_mA
-                    * sys_ui.ui_data.real_time_voltage_mV / 1000;
-                uint32_t max_power_mW = (uint32_t)sys_ui.ui_data.max_current_mA
-                    * sys_ui.ui_data.max_voltage_mV / 1000;
-
-                if (max_power_mW > 0)
-                    speed_by_power = (uint16_t)(power_mW * MAX_PWM_DUTY / max_power_mW);
+        } else {
+            // 风扇未运行：温度或电流任一达到阈值即开启
+            if (temp_C >= FAN_ON_TEMP_C || current_mA >= FAN_ON_CURRENT_MA) {
+                s_fan_active = 1;
+                goto calc_fan_speed;
             }
-
-            // 取较大值作为最终转速
-            fan_duty = (speed_by_temp > speed_by_power) ? speed_by_temp : speed_by_power;
-            if (fan_duty > MAX_PWM_DUTY) fan_duty = MAX_PWM_DUTY;
-            if (fan_duty < FAN_MIN_DUTY) fan_duty = FAN_MIN_DUTY;
         }
 
-        PWM4_SetWidth(fan_duty);
+        Fan_SetDuty(0);
+        return;
+
+    calc_fan_speed:
+    {   
+        // 温度分量：35°C→FAN_DUTY_ON(3), max_temperature_C→FAN_DUTY_MAX(10)
+        uint8_t speed_by_temp = FAN_DUTY_ON;
+        // 功率分量：实际功率/最大功率 × FAN_DUTY_MAX
+        uint8_t speed_by_power = 0;
+        if (temp_C > FAN_ON_TEMP_C && temp_C < sys_ui.ui_data.max_temperature_C) {
+            speed_by_temp += (uint8_t)((uint32_t)(temp_C - FAN_ON_TEMP_C)
+                            * (FAN_DUTY_MAX - FAN_DUTY_ON)
+                            / (sys_ui.ui_data.max_temperature_C - FAN_ON_TEMP_C));
+        }
+        
+        {
+            uint32_t power_mW = (uint32_t)current_mA
+                * sys_ui.ui_data.real_time_voltage_mV / 1000;
+            uint32_t max_power_mW = (uint32_t)sys_ui.ui_data.max_current_mA
+                * sys_ui.ui_data.max_voltage_mV / 1000;
+
+            if (max_power_mW > 0)
+                speed_by_power = (uint8_t)(power_mW * FAN_DUTY_MAX / max_power_mW);
+        }
+
+        // 取较大值作为最终转速
+        fan_duty = (speed_by_temp > speed_by_power) ? speed_by_temp : speed_by_power;
+        if (fan_duty > FAN_DUTY_MAX) fan_duty = FAN_DUTY_MAX;
+        if (fan_duty < FAN_DUTY_ON)  fan_duty = FAN_DUTY_ON;
+    }
+
+        Fan_SetDuty(fan_duty);
     }
 }

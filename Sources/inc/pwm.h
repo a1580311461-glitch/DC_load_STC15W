@@ -24,8 +24,6 @@ void PWM_Init(void);
 // 在此添加用户外部函数和外部变量声明 
 void PWM2_SetWidth(unsigned int Width);
 void PWM2_Setting(void); 
-void PWM4_SetWidth(unsigned int Width);
-void PWM4_Setting(void); 
 //<<AICUBE_USER_EXTERNAL_DECLARE_END>>
 
 

@@ -3,6 +3,8 @@
 	<PORT_LIST>
 		<COM Name="COM9" Remarks="" Baund="9600" Parity="0" StopBit="0" DataBit="0" FlowCtrl="0" DTR="0" TransMode="0" CharType="0" BreakTime="10" />
 		<COM Name="COM11" Remarks="PL2303" Baund="9600" Parity="0" StopBit="0" DataBit="0" FlowCtrl="0" DTR="0" TransMode="0" CharType="0" BreakTime="10" />
+		<COM Name="COM4" Remarks="" Baund="9600" Parity="0" StopBit="0" DataBit="0" FlowCtrl="0" DTR="0" TransMode="0" CharType="0" BreakTime="10" />
+		<COM Name="COM12" Remarks="" Baund="9600" Parity="0" StopBit="0" DataBit="0" FlowCtrl="0" DTR="0" TransMode="0" CharType="0" BreakTime="10" />
 	</PORT_LIST>
 	<SIGNT SYS_DATA="" ALARM="" HISDATA="" />
 	<MQTT />
@@ -12,12 +14,43 @@
 		<TYPELIST />
 	</ALARM_LIST>
 	<SYS_DATA>
-		<PAGE ID="1" Name="HOME" width="1920" hight="1080" BackColor="#FFFFFFFF" PicPath="" />
+		<PAGE ID="1" Name="HOME" width="1920" hight="1080" BackColor="#FFFFFFFF" PicPath="">
+			<CHIPV ID="1" Width="300" Height="50" PosX="935" PosY="121" />
+			<CHIPV ID="2" Width="100" Height="300" PosX="477" PosY="620" />
+			<CHIPV ID="4" Width="200" Height="200" PosX="413" PosY="386" />
+			<CHIPV ID="5" Width="200" Height="200" PosX="410" PosY="163" />
+			<CHIPV ID="6" Width="200" Height="50" PosX="1008" PosY="514" />
+			<CHIPV ID="7" Width="100" Height="50" PosX="994" PosY="803" />
+			<CHIPV ID="8" Width="200" Height="100" PosX="986" PosY="231" />
+			<CHIPV ID="9" Width="50" Height="50" PosX="1118" PosY="804" />
+			<CHIPV ID="10" Width="667" Height="60" PosX="530" PosY="51" />
+		</PAGE>
+		<CHIPV ID="1" lock="0" Type="5" Intvl="10" ExtroPara="tagcolor::#FF000000;stt::0;asyn_t::OFF;synt_intvl::1;" />
+		<CHIPV ID="2" lock="0" Type="13" Intvl="10" ExtroPara="tagcolor::#FF000000;max::100;min::-30;preci::0;default::0;">
+			<DeviceData DeviceID="1" DataID="11" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="4" lock="0" Type="6" Intvl="10" ExtroPara="tagcolor::#FF000000;uint::A;preci::0;max::4;min::0;default::0;">
+			<DeviceData DeviceID="1" DataID="10" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="5" lock="0" Type="7" Intvl="10" ExtroPara="tagcolor::#FF000000;uint::V;preci::0;max::10;min::0;default::0;">
+			<DeviceData DeviceID="1" DataID="9" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="6" lock="0" Type="31" Intvl="10" ExtroPara="tagcolor::#FFFFFFFF;backcolor::#FF28A745;fsize::20;shabl::ON;">
+			<DeviceData DeviceID="1" DataID="1" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="7" lock="0" Type="11" Intvl="10" ExtroPara="openV::1;closeV::0;openN::;closeN::;ro::ON;default::0;">
+			<DeviceData DeviceID="1" DataID="12" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="8" lock="0" Type="36" Intvl="10" ExtroPara="bodercolor::#FFFFFFFF;boderwidth::0;rd_b::10;c_top::#007F7E;c_bom::#333365;tlcolor::#FFFFFFFF;vlcolor::#FFFFFFFF;fs_t::20;fs_v::20;tlname::;uint::;" />
+		<CHIPV ID="9" lock="0" Type="24" Intvl="10" ExtroPara="layout::0;openV::1;closeV::0;openC::#FFFF0033;closeC::#FFCCCCCC;default::0;shpsq::OFF;openSk::OFF;shrkHz::2;tagshow::OFF;tagcolor::#FF000000;fsize::15;">
+			<DeviceData DeviceID="1" DataID="12" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="10" lock="0" Type="18" Intvl="10" ExtroPara="text::直流电子负载ModBus组态软件 V1.0;fsize::40;t_bd::ON;color::#FF000000;backcolor::#00000000;" />
 	</SYS_DATA>
 	<DEVICE_LIST>
-		<DEVICE ID="1" Name="[M]COM11-电子直流负载-021" DeviceType="1" BindMode="0" BindDeviceID="0" Addr="21" mr_reg="125" mr_bit="2000" p_invl="0" btime="0" AddrUIMode="0" CRCByteOder="1" BlockBitOder="0" AddrOffset="0" PackWay="1" BitGap="0" RegGap="5" OneReg10="0" OneCoil0F="0" BCast1="0" BCast2="0" IsBCDevice="0" BathReadMode="0" cGp="">
+		<DEVICE ID="1" Name="[M]电子直流负载-021" DeviceType="1" BindMode="0" BindDeviceID="0" Addr="21" mr_reg="125" mr_bit="2000" p_invl="0" btime="0" AddrUIMode="0" CRCByteOder="1" BlockBitOder="0" AddrOffset="0" PackWay="1" BitGap="0" RegGap="5" OneReg10="0" OneCoil0F="0" BCast1="0" BCast2="0" IsBCDevice="0" BathReadMode="0" cGp="">
 			<PORTS>
-				<port Name="COM11" />
+				<port Name="COM12" />
 			</PORTS>
 			<GROUPS />
 			<SELF_LIST />
@@ -70,13 +103,13 @@
 					<ENUMS />
 					<GROUPS />
 				</DATA>
-				<DATA ID="9" Name="实时电压" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="mV" ShowType="0" Addr="4096" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+				<DATA ID="9" Name="实时电压" BLOCK="2" PrtcTYPE="1" PointNum="3" Unit="V" ShowType="0" Addr="4096" Gain="0.001" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
 					<TIMEOUT Time="2000" ResendCount="0" />
 					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
 					<ENUMS />
 					<GROUPS />
 				</DATA>
-				<DATA ID="10" Name="实时电流" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="mA" ShowType="0" Addr="4097" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+				<DATA ID="10" Name="实时电流" BLOCK="2" PrtcTYPE="1" PointNum="3" Unit="A" ShowType="0" Addr="4097" Gain="0.001" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
 					<TIMEOUT Time="2000" ResendCount="0" />
 					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
 					<ENUMS />
@@ -101,6 +134,12 @@
 					<GROUPS />
 				</DATA>
 				<DATA ID="14" Name="过温标志（0-NORMAL, 1-ERR）" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="--" ShowType="0" Addr="4101" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="1" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+					<TIMEOUT Time="2000" ResendCount="0" />
+					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
+					<ENUMS />
+					<GROUPS />
+				</DATA>
+				<DATA ID="15" Name="启动次数" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="--" ShowType="0" Addr="4102" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="1" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
 					<TIMEOUT Time="2000" ResendCount="0" />
 					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
 					<ENUMS />

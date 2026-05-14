@@ -45,19 +45,12 @@ void PWM_Init(void)
     PWM_SetC2T2Point(500);              //使能PWM2翻转点2的计数值
     PWM_EnableC2Output();               //使能PWM2通道输出
 
-    PWM_C4_SwitchP22();                 //设置PWM4端口: PWM4 (P2.2)
-    PWM_InitialC4High();                //设置PWM4通道初始电平为高电平
-    PWM_SetC4T1Point(0);                //使能PWM4翻转点1的计数值
-    PWM_SetC4T2Point(500);              //使能PWM4翻转点2的计数值
-    PWM_EnableC4Output();               //使能PWM4通道输出
-
     PWM_Enable();                       //使能PWM功能
 
     //<<AICUBE_USER_PWM_INITIAL_BEGIN>>
     // 在此添加用户初始化代码  
 
     PWM2_Setting();
-    PWM4_Setting();
 
     //<<AICUBE_USER_PWM_INITIAL_END>>
 }
@@ -108,54 +101,6 @@ void PWM2_Setting(void)
     //PWM_DisableC2Output();
     //禁止PWM2通道输出，PWM端口为GPIO口，受端口寄存器的值控制
     PWM_IN = 0;
-    //当禁止PWM输出时，PWM端口为GPIO口，需要设置端口寄存器的值为0[上电默认为1]
-
-    PWM_Enable();
-    //使能PWM功能
-}
-
-
-// PWM4脉宽设置
-void PWM4_SetWidth(unsigned int Width)
-{
-    if(Width >= PWM_CYCLE)
-    {
-        PWM_SetC4T2Point(PWM_CYCLE);    //差1个脉宽
-        PWM_DisableC4Output();          //关闭PWM输出，使能GPIO
-        PWM_FAN = 1;                     //直接输出高电平
-    }
-    else if(Width < 1)
-    {
-        PWM_SetC4T2Point(1);            //差1个脉宽
-        PWM_DisableC4Output();          //关闭PWM输出，使能GPIO
-        PWM_FAN = 0;                     //直接输出低电平
-    }
-    else
-    {
-        PWM_SetC4T2Point(Width);        //设置T2
-        PWM_EnableC4Output();           //使能PWM输出
-    }
-}
-
-void PWM4_Setting(void)
-{
-    //PWM2(P3.7)通道设置：
-    PWM_Disable();    //【注意】配置前必须先Disable，配置完毕后再Enable！！《见手册P.1032，关于ENPMW控制位的重要说明》
-    //所有ENPMW必须在其他所有的PWM设置（包括T1/T2翻转点的设置、初始电平的设置、PWM异常检测的设置以及PWM中断设置）都完成后，最后才能使能ENPMW位
-    //PWM_InitialC2High();
-    //设置PWM4通道初始电平为高电平
-    PWM_InitialC4Low();
-    //设置PWM4通道初始电平为低电平【注意：Aicube截止V1.01N版有Bug，设置初始电平为低电平没有效果】
-    PWM_SetC4T1Point(0);
-    //使能PWM4翻转点1的计数值
-    PWM_SetC4T2Point(10);
-    //使能PWM4翻转点2的计数值 1~1000 【注意：T2和T1不能重合，T1和T2不能大于周期，否则：周期翻倍，50%占空比】
-    PWM_EnableC4Output();
-    //使能PWM4通道输出，PWM端口受PWM波形发生器控制
-
-    //PWM_DisableC2Output();
-    //禁止PWM4通道输出，PWM端口为GPIO口，受端口寄存器的值控制
-    PWM_FAN = 0;
     //当禁止PWM输出时，PWM端口为GPIO口，需要设置端口寄存器的值为0[上电默认为1]
 
     PWM_Enable();

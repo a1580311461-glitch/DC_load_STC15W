@@ -16,6 +16,7 @@ void Buzzer_Tick(void);
 void Buzzer_KeyBeep(void);
 void Buzzer_PowerOn(void);
 void Buzzer_SetAlarm(uint8_t enable);
+void Buzzer_ShortTick(void);                         // 短促嘀嗒声(5ms)，连按数值变化时使用
 
 extern volatile uint8_t buzzer_active; // Timer1 ISR 据此翻转 BUZZER 引脚
 

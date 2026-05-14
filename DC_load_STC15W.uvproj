@@ -362,11 +362,6 @@
 							<FilePath>.\Sources\clock.c</FilePath>
 						</File>
 						<File>
-							<FileName>iap.c</FileName>
-							<FileType>1</FileType>
-							<FilePath>.\Sources\iap.c</FilePath>
-						</File>
-						<File>
 							<FileName>timer.c</FileName>
 							<FileType>1</FileType>
 							<FilePath>.\Sources\timer.c</FilePath>

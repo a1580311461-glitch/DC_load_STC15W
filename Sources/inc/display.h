@@ -23,7 +23,8 @@ typedef enum {
 typedef enum {
     SETTING_SUB_LIST = 0,          // 浏览菜单列表
     SETTING_SUB_EDIT,              // 编辑数值
-    SETTING_SUB_MODE_SELECT        // 选择 CC/CR/CP 模式
+    SETTING_SUB_MODE_SELECT,       // 选择 CC/CR/CP 模式
+    SETTING_SUB_FACTORY_CONFIRM    // 恢复出厂确认
 } SettingSubState_e;
 
 typedef struct {
@@ -40,6 +41,7 @@ typedef struct {
     uint16_t max_temperature_C;                // OTP 保护阈值，单位摄氏度
     uint8_t is_over_voltage;                     // 过压报警标志
     uint8_t is_over_temperature;                 // 过温报警标志
+    uint16_t boot_count;                         // 启动次数
 } UIData_t;
 
 typedef struct {

@@ -14,7 +14,10 @@
 
 
 //<<AICUBE_USER_INCLUDE_BEGIN>>
-// 在此添加用户头文件包含  
+// 在此添加用户头文件包含
+
+#include "fan.h"
+
 //<<AICUBE_USER_INCLUDE_END>>
 
 
@@ -73,6 +76,26 @@ void TIMER1_Init(void)
     //<<AICUBE_USER_TIMER1_INITIAL_END>>
 }
 
+////////////////////////////////////////
+// 定时器4初始化函数
+// 入口参数: 无
+// 函数返回: 无
+////////////////////////////////////////
+void TIMER4_Init(void)
+{
+#define T4_RELOAD               (65536 - (float)SYSCLK * 1 / 1000) //定时周期1毫秒
+
+    TIMER4_TimerMode();                 //设置定时器4为定时模式
+    TIMER4_1TMode();                    //设置定时器4为1T模式
+    TIMER4_EnableInt();                 //使能定时器4中断
+    TIMER4_SetReload16(T4_RELOAD);      //设置定时器4的16位重载值
+    TIMER4_Run();                       //定时器4开始运行
+
+    //<<AICUBE_USER_TIMER4_INITIAL_BEGIN>>
+    // 在此添加用户初始化代码  
+    //<<AICUBE_USER_TIMER4_INITIAL_END>>
+}
+
 
 ////////////////////////////////////////
 // 定时器0中断服务程序
@@ -82,7 +105,7 @@ void TIMER1_Init(void)
 void TIMER0_ISR(void) interrupt TMR0_VECTOR
 {
     //<<AICUBE_USER_TIMER0_ISR_CODE1_BEGIN>>
-    // 在此添加中断函数用户代码  
+    // 在此添加中断函数用户代码
 
     sys_tick++; // 1ms 加一次
 
@@ -109,6 +132,31 @@ void TIMER1_ISR(void) interrupt TMR1_VECTOR
     }
 
     //<<AICUBE_USER_TIMER1_ISR_CODE1_END>>
+}
+
+////////////////////////////////////////
+// 定时器4中断服务程序
+// 入口参数: 无
+// 函数返回: 无
+////////////////////////////////////////
+void TIMER4_ISR(void) interrupt TMR4_VECTOR
+{
+    //<<AICUBE_USER_TIMER4_ISR_CODE1_BEGIN>>
+    // 在此添加中断函数用户代码
+
+    // 软件PWM直接在中断内处理，消除跨文件调用的巨额压栈开销
+    if (fan_duty == 0) {
+        FAN = 0;                        // 停止
+    } else if (fan_duty >= FAN_PWM_PERIOD) {
+        FAN = 1;                        // 全速
+    } else {
+        if (++fan_cnt >= FAN_PWM_PERIOD) {
+            fan_cnt = 0;
+        }
+        FAN = (fan_cnt < fan_duty); // 占空比控制
+    }
+
+    //<<AICUBE_USER_TIMER4_ISR_CODE1_END>>
 }
 
 

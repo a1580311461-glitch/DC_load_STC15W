@@ -9,17 +9,21 @@
 
 #include "config.h"
 
-// 发声节奏时间常量 (单位: ms)
-#define BUZZER_KEY_DURATION     50      // 按键提示音发声时间
+
+// 发声节奏时间常量 (单位: ms)  
+#define BUZZER_KEY_DURATION     20      // 按键提示音发声时间
+#define BUZZER_TICK_DURATION    5       // 连按键反馈嘀嗒声时间
 #define BUZZER_ALARM_ON_MS      100     // 报警音单次发声时间
 #define BUZZER_ALARM_OFF_MS     100     // 报警音单次间歇时间
 #define BUZZER_POWER_ON_MS      100     // 开机提示音发声时间
 #define BUZZER_POWER_OFF_MS     100     // 开机提示音间歇时间
 
+
 // 发声状态枚举
 typedef enum {
     BUZZER_IDLE = 0,
     BUZZER_KEY_BEEP,
+    BUZZER_SHORT_TICK,          // 短嘀嗒声(5ms)，连按数值变化反馈
     BUZZER_POWER_ON_1,          // 开机第1次发声
     BUZZER_POWER_ON_OFF,        // 开机间歇
     BUZZER_POWER_ON_2,          // 开机第2次发声
@@ -27,9 +31,9 @@ typedef enum {
     BUZZER_ALARM_OFF            // 报警间歇阶段
 } BuzzerState_e;
 
-static BuzzerState_e s_state = BUZZER_IDLE;
-static uint16_t s_tick_start = 0;       // 状态机进入当前阶段的时刻(sys_tick)
-static uint8_t s_alarm_enable = 0;      // 报警使能标志
+static BuzzerState_e xdata s_state = BUZZER_IDLE;
+static uint16_t xdata s_tick_start = 0; // 状态机进入当前阶段的时刻(Get_SysTick())
+static uint8_t xdata s_alarm_enable = 0;// 报警使能标志
 
 volatile uint8_t buzzer_active = 0;   // =1时Timer1 ISR翻转BUZZER产生方波
 
@@ -62,19 +66,27 @@ void Buzzer_Tick(void)
         if (s_alarm_enable)
         {
             buzzer_active = 1;
-            s_tick_start = sys_tick;
+            s_tick_start = Get_SysTick();
             s_state = BUZZER_ALARM_ON;
         }
         return;
     }
 
-    now = sys_tick;
+    now = Get_SysTick();
     elapsed = (uint16_t)(now - s_tick_start);
 
     switch (s_state)
     {
     case BUZZER_KEY_BEEP:
         if (elapsed >= BUZZER_KEY_DURATION)
+        {
+            buzzer_active = 0;
+            s_state = BUZZER_IDLE;
+        }
+        break;
+
+    case BUZZER_SHORT_TICK:
+        if (elapsed >= BUZZER_TICK_DURATION)
         {
             buzzer_active = 0;
             s_state = BUZZER_IDLE;
@@ -146,8 +158,20 @@ void Buzzer_Tick(void)
 void Buzzer_KeyBeep(void)
 {
     buzzer_active = 1;
-    s_tick_start = sys_tick;
+    s_tick_start = Get_SysTick();
     s_state = BUZZER_KEY_BEEP;
+}
+
+////////////////////////////////////////
+// 短促嘀嗒声（非阻塞，5ms短促发声，连按数值变化时使用）
+// 入口参数: 无
+// 函数返回: 无
+////////////////////////////////////////
+void Buzzer_ShortTick(void)
+{
+    buzzer_active = 1;
+    s_tick_start = Get_SysTick();
+    s_state = BUZZER_SHORT_TICK;
 }
 
 ////////////////////////////////////////
@@ -158,7 +182,7 @@ void Buzzer_KeyBeep(void)
 void Buzzer_PowerOn(void)
 {
     buzzer_active = 1;
-    s_tick_start = sys_tick;
+    s_tick_start = Get_SysTick();
     s_state = BUZZER_POWER_ON_1;
 }
 
@@ -177,7 +201,7 @@ void Buzzer_SetAlarm(uint8_t enable)
         if (s_state == BUZZER_IDLE)
         {
             buzzer_active = 1;
-            s_tick_start = sys_tick;
+            s_tick_start = Get_SysTick();
             s_state = BUZZER_ALARM_ON;
         }
         // 非空闲状态：报警标志已置位，状态机回到IDLE后会自动切入报警

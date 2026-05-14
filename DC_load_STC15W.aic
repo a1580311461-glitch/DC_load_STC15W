@@ -199,11 +199,11 @@
 		<WDTPrescale>3</WDTPrescale>
 	</WDT>
 	<IAP>
-		<PeriEnable>1</PeriEnable>
+		<PeriEnable>0</PeriEnable>
 		<IAPEraseFunc>1</IAPEraseFunc>
 		<IAPProgramFunc>1</IAPProgramFunc>
-		<IAPReadFunc>1</IAPReadFunc>
-		<IAPOffset>0x8000</IAPOffset>
+		<IAPReadFunc>2</IAPReadFunc>
+		<IAPOffset>0xB800</IAPOffset>
 	</IAP>
 	<TIMER0>
 		<PeriEnable>1</PeriEnable>
@@ -278,21 +278,21 @@
 		<IntPriority>0</IntPriority>
 	</TIMER3>
 	<TIMER4>
-		<PeriEnable>0</PeriEnable>
+		<PeriEnable>1</PeriEnable>
 		<EnableCLKO>0</EnableCLKO>
 		<EnableGATE>0</EnableGATE>
 		<BaudrateX2>0</BaudrateX2>
 		<ClockSource>0</ClockSource>
-		<Clock12T>0</Clock12T>
+		<Clock12T>1</Clock12T>
 		<TimerCT>0</TimerCT>
 		<TimerMode>0</TimerMode>
 		<TimerAction>0</TimerAction>
-		<TimerInterval>100</TimerInterval>
-		<TimerUnit>0</TimerUnit>
-		<TimerReload>1</TimerReload>
+		<TimerInterval>1</TimerInterval>
+		<TimerUnit>1</TimerUnit>
+		<TimerReload>11059</TimerReload>
 		<UartBaudrate>9600</UartBaudrate>
 		<CLKOPort>-1</CLKOPort>
-		<EnableInt>0</EnableInt>
+		<EnableInt>1</EnableInt>
 		<IntPriority>0</IntPriority>
 	</TIMER4>
 	<UART1>
@@ -470,8 +470,8 @@
 		<PWMT1Point_3>200</PWMT1Point_3>
 		<PWMT2Point_3>500</PWMT2Point_3>
 		<PWMIntMode_3>0</PWMIntMode_3>
-		<EnablePWMOutput_4>1</EnablePWMOutput_4>
-		<PWMPort_4>0</PWMPort_4>
+		<EnablePWMOutput_4>0</EnablePWMOutput_4>
+		<PWMPort_4>-1</PWMPort_4>
 		<PWMInitLevel_4>0</PWMInitLevel_4>
 		<PWMT1Point_4>0</PWMT1Point_4>
 		<PWMT2Point_4>500</PWMT2Point_4>
@@ -505,7 +505,6 @@
 		<Pin27Map>1</Pin27Map>
 		<Pin28Map>1</Pin28Map>
 		<Pin36Map>4</Pin36Map>
-		<Pin47Map>2</Pin47Map>
 		<Pin59Map>1</Pin59Map>
 		<Pin60Map>1</Pin60Map>
 	</PINMAP>
@@ -524,7 +523,7 @@
 		<Pin36Alias>PWM_IN</Pin36Alias>
 		<Pin45Alias>OLED_SDIN</Pin45Alias>
 		<Pin46Alias>OLED_SCL</Pin46Alias>
-		<Pin47Alias>PWM_FAN</Pin47Alias>
+		<Pin47Alias>FAN</Pin47Alias>
 		<Pin51Alias>LED_ERR</Pin51Alias>
 		<Pin52Alias>LED_OUT</Pin52Alias>
 		<Pin59Alias>RxD3</Pin59Alias>

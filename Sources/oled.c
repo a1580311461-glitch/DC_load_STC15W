@@ -235,11 +235,14 @@ void OLED_Display_Off(void)
 	OLED_WR_Byte(0XAE,OLED_CMD);  //DISPLAY OFF
 }		   			 
 
-// //��������,������,������Ļ�Ǻ�ɫ��!��û����һ��!!!	  
-void OLED_Clear(unsigned dat)  
+// //��������,������,������Ļ�Ǻ�ɫ��!��û����һ��!!!
+void OLED_Clear(unsigned dat)
 {
     u8 i, n;
-    for(i = 0; i < 8; i++)  
+    // 重置显示关键寄存器（防止I2C偶发干扰导致显示偏移）
+    OLED_WR_Byte(0x2E, OLED_CMD);   // Deactivate scroll
+    OLED_WR_Byte(0x40, OLED_CMD);   // Reset display start line = 0
+    for(i = 0; i < 8; i++)
     {
         OLED_Set_Pos(0, i);
         IIC_Start();

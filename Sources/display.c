@@ -37,9 +37,10 @@ void UI_Init(void) {
     sys_ui.ui_data.device_address = 21;           // 初始化设备地址
     sys_ui.ui_data.max_current_mA = 3000;       // 初始化最大电流值3A
     sys_ui.ui_data.max_voltage_mV = 5500;      // 初始化最大电压值5.5V
-    sys_ui.ui_data.max_temperature_C = 80;         // 初始化 OTP 阈值 80°C
+    sys_ui.ui_data.max_temperature_C = 70;         // 初始化 OTP 阈值 70°C
     sys_ui.ui_data.is_over_voltage = 0;          // 初始化过压报警标志
     sys_ui.ui_data.is_over_temperature = 0;      // 初始化过温报警标志
+    sys_ui.ui_data.boot_count = 0;               // 初始化启动计数
     sys_ui.is_changed = 1;                 // 页面切换标志设为1，表示需要刷新显示
     s_mode_long_handled = 0;               // 清除MODE长按标记
 }
@@ -47,13 +48,13 @@ void UI_Init(void) {
 
 // ========== 子菜单辅助函数 ==========
 
-#define MENU_ITEM_COUNT     7
+#define MENU_ITEM_COUNT     8
 
 static uint8_t MenuItem_IsActive(uint8_t index)
 {
     uint8_t mode_bit;
 
-    if (index == 0 || index == 4 || index == 5 || index == 6)
+    if (index == 0 || index == 4 || index == 5 || index == 6 || index == 7)
         return 1;
     mode_bit = 1 << (uint8_t)sys_ui.ui_data.op_mode;
     if (index == 1 && (mode_bit & 0x01)) return 1;
@@ -66,7 +67,7 @@ static const char code * MenuItem_GetName(uint8_t index)
 {
     static const char code * const names[MENU_ITEM_COUNT] = {
         "Mode Select", "Target I", "Target R", "Target P",
-        "OVP Limit",   "OTP Limit", "RS485 Addr"
+        "OVP Limit",   "OTP Limit", "RS485 Addr", "Reset"
     };
     return names[index];
 }
@@ -99,8 +100,11 @@ static void MenuItem_FormatValue(uint8_t index, uint8_t *buf)
         val = sys_ui.ui_data.device_address;
         sprintf((char*)buf, "#%d", (int)val);
         break;
-    default: 
-        buf[0] = 0; 
+    case 7:
+        buf[0] = 0;
+        break;
+    default:
+        buf[0] = 0;
         break;
     }
 }
@@ -111,7 +115,7 @@ static uint16_t* MenuItem_GetEditParams(uint8_t index, uint16_t *p_min, uint16_t
     uint16_t *ret_ptr = NULL;
 
     switch (index) {
-    case 1:  min_v = 100;   max_v = 3000;    step_v = 10;   ret_ptr = &sys_ui.ui_data.setting_current_mA; break;
+    case 1:  min_v = 0;     max_v = 3000;    step_v = 10;   ret_ptr = &sys_ui.ui_data.setting_current_mA; break;
     case 2:  min_v = 0;     max_v = 100000;  step_v = 100;  ret_ptr = &sys_ui.ui_data.setting_resistance_mOhm; break;
     case 3:  min_v = 0;     max_v = 50000;   step_v = 100;  ret_ptr = &sys_ui.ui_data.setting_power_mW; break;
     case 4:  min_v = 0;     max_v = 60000;   step_v = 100;  ret_ptr = &sys_ui.ui_data.max_voltage_mV; break;
@@ -272,6 +276,15 @@ static void DrawModeSelect(void)
     }
 }
 
+static void DrawFactoryResetConfirm(void)
+{
+    OLED_Clear(0);
+    OLED_ShowString(0, 0, " Factory Reset ", 16);
+    OLED_ShowString(0, 3, "Reset All?", 16);
+    OLED_ShowString(0, 5, "MODE=Yes", 12);
+    OLED_ShowString(0, 6, "ON/OFF=No", 12);
+}
+
 /*
  * @brief   UI 显示主任务
  */
@@ -290,8 +303,9 @@ void UI_Task(void)
                 OLED_ShowChinese(0 + 16 * 3, 2, fu2);  // '傅'
                 OLED_ShowChinese(0 + 16 * 4, 2, bei);  // '倍'
                 OLED_ShowChinese(0 + 16 * 5, 2, liang);  // '梁'
-                OLED_ShowString(0, 4, "No.:0521", 12);
-                OLED_ShowString(0, 5, "Class:EE", 12);
+                OLED_ShowString(0, 4, "No.:0521", 16);
+                sprintf((char*)disp_buf, "Boot:%d", (int)sys_ui.ui_data.boot_count);
+                OLED_ShowString(0, 6, disp_buf, 12);
                 OLED_ShowString(0, 7, "Initializing...", 12);
                 OLED_DrawBMP(90, 4, 32, 32, Icon_32x32_School_Emble); // 显示图标
                 break;
@@ -384,8 +398,7 @@ void UI_Task(void)
             }
 
             // --- Line 1: 电压 (16px, y=0) ---
-            // 修复：增加对未初始化状态(0xFFFF)的放行判断
-            if (last_display_real_time_voltage == 0xFFFF || 
+            if (last_display_real_time_voltage == 0xFFFF ||
                 abs((int16_t)last_display_real_time_voltage - (int16_t)sys_ui.ui_data.real_time_voltage_mV) > 10) {
                 sprintf((char*)disp_buf, "V_in :%2d.%03d V",
                     (int)(sys_ui.ui_data.real_time_voltage_mV / 1000),
@@ -395,7 +408,7 @@ void UI_Task(void)
             }
 
             // --- Line 2: 电流 (16px, y=2) ---
-            if (last_display_real_time_current == 0xFFFF || 
+            if (last_display_real_time_current == 0xFFFF ||
                 abs((int16_t)last_display_real_time_current - (int16_t)sys_ui.ui_data.real_time_current_mA) > 5) {
                 sprintf((char*)disp_buf, "I_out:%2d.%03d A",
                     (int)(sys_ui.ui_data.real_time_current_mA / 1000),
@@ -502,7 +515,6 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
     if (event == KEY_EVENT_UP)
     {
         uint16_t min_v, max_v, step;
-        Buzzer_KeyBeep();
         switch (key_id)
         {
             case KEY_ID_MODE:
@@ -520,6 +532,10 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
                             s_setting_sub_state = SETTING_SUB_MODE_SELECT;
                             s_edit_sel_index = (uint8_t)sys_ui.ui_data.op_mode;
                             DrawModeSelect();
+                        } else if (s_setting_index == MENU_ITEM_COUNT - 1) {
+                            // 恢复出厂设置：进入确认
+                            s_setting_sub_state = SETTING_SUB_FACTORY_CONFIRM;
+                            DrawFactoryResetConfirm();
                         } else if (MenuItem_IsActive(s_setting_index)) {
                             // 进入编辑模式
                             s_setting_sub_state = SETTING_SUB_EDIT;
@@ -529,15 +545,27 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
                             DrawEditValue(s_setting_index);
                         }
                     } else if (s_setting_sub_state == SETTING_SUB_EDIT) {
-                        // 确认修改 → 保存到 EEPROM
-                        Settings_Save();
+                        // 仅返回列表，不保存（由长按全量保存）
                         s_setting_sub_state = SETTING_SUB_LIST;
                         sys_ui.is_changed = 1;
                     } else if (s_setting_sub_state == SETTING_SUB_MODE_SELECT) {
-                        // 确认模式选择
+                        // 应用模式选择到 RAM，但不写入 EEPROM（由长按全量保存）
                         sys_ui.ui_data.op_mode = (OpMode_e)s_edit_sel_index;
-                        Settings_Save();
                         s_setting_sub_state = SETTING_SUB_LIST;
+                        sys_ui.is_changed = 1;
+                    } else if (s_setting_sub_state == SETTING_SUB_FACTORY_CONFIRM) {
+                        // 确认恢复出厂设置
+                        EEPROM_Save(1);                     // 写入出厂默认值到EEPROM
+                        // 重置UI参数
+                        sys_ui.ui_data.op_mode = OP_MODE_CC;
+                        sys_ui.ui_data.setting_current_mA = 1000;
+                        sys_ui.ui_data.setting_resistance_mOhm = 5000;
+                        sys_ui.ui_data.setting_power_mW = 2500;
+                        sys_ui.ui_data.device_address = 21;
+                        sys_ui.ui_data.max_voltage_mV = 5500;
+                        sys_ui.ui_data.max_temperature_C = 80;
+                        // 切换到启动页
+                        sys_ui.current_page = SYS_STATE_START_PAGE;
                         sys_ui.is_changed = 1;
                     }
                     break;  // 不执行下面的页面切换
@@ -554,14 +582,27 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
                 switch (sys_ui.current_page) {
                     case SYS_STATE_SETTING_PAGE:
                         if (s_setting_sub_state == SETTING_SUB_LIST) {
+                            {   uint8_t idata prev = s_setting_index;
                             next = FindNextActiveItem(s_setting_index, -1);
                             if (next != s_setting_index) {
                                 s_setting_index = next;
                                 if (s_setting_index < s_setting_scroll_offset)
                                     s_setting_scroll_offset = s_setting_index;
-                                else if (s_setting_index >= s_setting_scroll_offset + 3)
-                                    s_setting_scroll_offset = s_setting_index - 2;
+                                else if (s_setting_index >= s_setting_scroll_offset + 3) {
+                                    // 计算实际跳过的步数（处理非激活项跳跃）
+                                    uint8_t idata step_cnt = s_setting_index - prev;
+                                    if (step_cnt == 1) {
+                                        // 正常逐项滚动：光标保持在底部（保持旧行为）
+                                        s_setting_scroll_offset = s_setting_index - 2;
+                                    } else {
+                                        // 跳跃滚动（因非激活项被跳过）：光标居中
+                                        s_setting_scroll_offset = s_setting_index - 1;
+                                        if (s_setting_scroll_offset > MENU_ITEM_COUNT - 3)
+                                            s_setting_scroll_offset = MENU_ITEM_COUNT - 3;
+                                    }
+                                }
                                 DrawSettingList();
+                            }
                             }
                         } else if (s_setting_sub_state == SETTING_SUB_EDIT) {
                             p_val = MenuItem_GetEditParams(s_setting_index, &min_v, &max_v, &step);
@@ -602,14 +643,27 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
                 switch (sys_ui.current_page) {
                     case SYS_STATE_SETTING_PAGE:
                         if (s_setting_sub_state == SETTING_SUB_LIST) {
+                            {   uint8_t idata prev = s_setting_index;
                             next = FindNextActiveItem(s_setting_index, 1);
                             if (next != s_setting_index) {
                                 s_setting_index = next;
                                 if (s_setting_index < s_setting_scroll_offset)
                                     s_setting_scroll_offset = s_setting_index;
-                                else if (s_setting_index >= s_setting_scroll_offset + 3)
-                                    s_setting_scroll_offset = s_setting_index - 2;
+                                else if (s_setting_index >= s_setting_scroll_offset + 3) {
+                                    // 计算实际跳过的步数（处理非激活项跳跃）
+                                    uint8_t idata step_cnt = s_setting_index - prev;
+                                    if (step_cnt == 1) {
+                                        // 正常逐项滚动：光标保持在底部（保持旧行为）
+                                        s_setting_scroll_offset = s_setting_index - 2;
+                                    } else {
+                                        // 跳跃滚动（因非激活项被跳过）：光标居中
+                                        s_setting_scroll_offset = s_setting_index - 1;
+                                        if (s_setting_scroll_offset > MENU_ITEM_COUNT - 3)
+                                            s_setting_scroll_offset = MENU_ITEM_COUNT - 3;
+                                    }
+                                }
                                 DrawSettingList();
+                            }
                             }
                         } else if (s_setting_sub_state == SETTING_SUB_EDIT) {
                             p_val = MenuItem_GetEditParams(s_setting_index, &min_v, &max_v, &step);
@@ -626,10 +680,10 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
                     case SYS_STATE_MONITOR_PAGE:
                         switch (sys_ui.ui_data.op_mode) {
                         case OP_MODE_CC:
-                            if (sys_ui.ui_data.setting_current_mA >= 110)
+                            if (sys_ui.ui_data.setting_current_mA >= 10)
                                 sys_ui.ui_data.setting_current_mA -= 10;
                             else
-                                sys_ui.ui_data.setting_current_mA = 100;
+                                sys_ui.ui_data.setting_current_mA = 0;
                             break;
                         case OP_MODE_CR:
                             if (sys_ui.ui_data.setting_resistance_mOhm >= 1100)
@@ -661,13 +715,25 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
                     } else if (s_setting_sub_state == SETTING_SUB_MODE_SELECT) {
                         s_setting_sub_state = SETTING_SUB_LIST;
                         sys_ui.is_changed = 1;
+                    } else if (s_setting_sub_state == SETTING_SUB_FACTORY_CONFIRM) {
+                        s_setting_sub_state = SETTING_SUB_LIST;
+                        sys_ui.is_changed = 1;
                     }
                 } else {
-                    OUTPUT_EN_TOGGLE(); // 每次按ON/OFF键切换OUTPUT_EN控制的开关状态
-                    if (!OUTPUT_EN_IS_ON) {
-                        Current_Control_ResetDuty(); // 关闭输出时复位占空比
+                    // 错误保护激活时，ON/OFF仅清除错误状态，不改变输出
+                    if (sys_ui.ui_data.is_over_voltage || sys_ui.ui_data.is_over_temperature) {
+                        sys_ui.ui_data.is_over_voltage = 0;
+                        sys_ui.ui_data.is_over_temperature = 0;
+                        LED_ERR_OFF();
+                        Buzzer_SetAlarm(0);
+                    } else {
+                        OUTPUT_EN_TOGGLE(); // 每次按ON/OFF键切换OUTPUT_EN控制的开关状态
+                        LED_OUT_TOGGLE(); // 同步切换LED状态指示
+                        if (!OUTPUT_EN_IS_ON) {
+                            Current_Control_ResetDuty(); // 关闭输出时复位占空比
+                        }
+                        printf("OUTPUT_EN is now %s\n", OUTPUT_EN_IS_ON ? "ON" : "OFF");
                     }
-                    printf("OUTPUT_EN is now %s\n", OUTPUT_EN_IS_ON ? "ON" : "OFF");
                 }
                 break;
         }
@@ -677,7 +743,6 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
     else if (event == KEY_EVENT_REPEAT)
     {
         uint16_t min_v, max_v, step;
-        Buzzer_KeyBeep();
         switch (key_id)
         {
             case KEY_ID_INC:
@@ -735,10 +800,10 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
                     case SYS_STATE_MONITOR_PAGE:
                         switch (sys_ui.ui_data.op_mode) {
                         case OP_MODE_CC:
-                            if (sys_ui.ui_data.setting_current_mA >= 110)
+                            if (sys_ui.ui_data.setting_current_mA >= 10)
                                 sys_ui.ui_data.setting_current_mA -= 10;
                             else
-                                sys_ui.ui_data.setting_current_mA = 100;
+                                sys_ui.ui_data.setting_current_mA = 0;
                             break;
                         case OP_MODE_CR:
                             if (sys_ui.ui_data.setting_resistance_mOhm >= 1100)
@@ -764,17 +829,13 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
     // 处理长按事件
     else if (event == KEY_EVENT_LONG)
     {
-        Buzzer_KeyBeep();
         switch (key_id)
         {
         case KEY_ID_MODE:
             if (sys_ui.current_page == SYS_STATE_SETTING_PAGE) {
-                // 长按退出设置页；编辑中则取消不保存
-                if (s_setting_sub_state == SETTING_SUB_EDIT) {
-                    p_val = MenuItem_GetEditParams(s_setting_index, NULL, NULL, NULL);
-                    if (p_val) *p_val = s_edit_temp_value;
-                }
-                sys_ui.current_page = SYS_STATE_MONITOR_PAGE;
+                // 长按保存当前设置到 EEPROM 并退出到监视页
+                EEPROM_Save(0);                     // 保存当前参数到EEPROM
+                sys_ui.current_page = SYS_STATE_START_PAGE;
                 sys_ui.is_changed = 1;
                 s_mode_long_handled = 1;
             } else if (sys_ui.current_page == SYS_STATE_MONITOR_PAGE) {
@@ -785,6 +846,7 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
                     sys_ui.ui_data.op_mode == OP_MODE_CC ? "CC" :
                     sys_ui.ui_data.op_mode == OP_MODE_CR ? "CR" : "CP");
                 OUTPUT_EN_OFF(); // 长按 MODE 键时先关闭输出，避免切换模式时的瞬间过流过压
+                LED_OUT_OFF(); // 同步关闭LED指示
             }
             break;
         default:
