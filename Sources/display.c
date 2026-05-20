@@ -24,6 +24,17 @@ static uint8_t idata s_setting_scroll_offset;
 static uint8_t idata s_edit_sel_index;
 static uint16_t idata s_edit_temp_value;
 
+// 负载调整率测试状态变量
+static AutoTestSubState_e idata s_auto_test_sub_state;
+static uint8_t idata s_auto_test_tick_count;                // 100ms tick计数器
+static uint16_t idata s_auto_test_noload_voltage_mV;        // V_no_load (mV)
+static uint16_t idata s_auto_test_load_voltage_mV;          // V_full_load (mV)
+static uint16_t idata s_auto_test_current_mA;               // 测试电流 (mA)
+static uint16_t idata s_auto_test_reg_x10000;               // 调整率×10000
+static uint16_t idata s_auto_test_saved_current_mA;         // 保存的setting_current_mA
+static uint8_t idata s_auto_test_saved_op_mode;             // 保存的op_mode
+static uint16_t idata s_auto_test_sum_mV;                   // 多采样累加器 (mV)
+static uint8_t idata s_auto_test_sample_cnt;                // 多采样计数器
 
 void UI_Init(void) {
     sys_ui.current_page = SYS_STATE_START_PAGE;  // 初始化当前页面为启动页
@@ -43,18 +54,23 @@ void UI_Init(void) {
     sys_ui.ui_data.boot_count = 0;               // 初始化启动计数
     sys_ui.is_changed = 1;                 // 页面切换标志设为1，表示需要刷新显示
     s_mode_long_handled = 0;               // 清除MODE长按标记
+    s_auto_test_current_mA = 1000;         // 默认测试电流1000mA
+    s_auto_test_sub_state = AUTO_TEST_SUB_IDLE;
+    s_auto_test_sum_mV = 0;
+    s_auto_test_sample_cnt = 0;
+    sys_ui.ui_data.auto_test_running = 0;  // 负载调整率测试未运行
 }
 
 
 // ========== 子菜单辅助函数 ==========
 
-#define MENU_ITEM_COUNT     8
+#define MENU_ITEM_COUNT     9
 
 static uint8_t MenuItem_IsActive(uint8_t index)
 {
     uint8_t mode_bit;
 
-    if (index == 0 || index == 4 || index == 5 || index == 6 || index == 7)
+    if (index == 0 || index == 4 || index == 5 || index == 6 || index == 7 || index == 8)
         return 1;
     mode_bit = 1 << (uint8_t)sys_ui.ui_data.op_mode;
     if (index == 1 && (mode_bit & 0x01)) return 1;
@@ -67,7 +83,7 @@ static const char code * MenuItem_GetName(uint8_t index)
 {
     static const char code * const names[MENU_ITEM_COUNT] = {
         "Mode Select", "Target I", "Target R", "Target P",
-        "OVP Limit",   "OTP Limit", "RS485 Addr", "Reset"
+        "OVP Limit",   "OTP Limit", "RS485 Addr", "Reset", "Load Reg"
     };
     return names[index];
 }
@@ -184,7 +200,7 @@ static void DrawSettingList(void)
 
     OLED_Clear(0);
 
-    // ��ʾ�˵��� (ҳ 2 ��  ҳ 7) ��ʹ�õ���I2C������
+    // 清除菜单区域 (页2到页7) 使用单次I2C传输
     for (i = 2; i <= 7; i++) {
         uint8_t j;
         OLED_Set_Pos(0, i);
@@ -285,6 +301,181 @@ static void DrawFactoryResetConfirm(void)
     OLED_ShowString(0, 6, "ON/OFF=No", 12);
 }
 
+// ========== 负载调整率测试 渲染函数 ==========
+
+static void DrawAutoTestIdle(void)
+{
+    OLED_Clear(0);
+    OLED_ShowString(0, 0, "--- Load Reg ---", 16);
+    sprintf((char*)disp_buf, "I_test:%4dmA", (int)s_auto_test_current_mA);
+    OLED_ShowString(0, 2, disp_buf, 16);
+    OLED_ShowString(0, 6, "ON/OFF: Start", 16);
+}
+
+static void DrawAutoTestResult(void)
+{
+    uint16_t val;
+
+    OLED_Clear(0);
+    OLED_ShowString(0, 0, "=== Load Reg ===", 16);
+
+    if (s_auto_test_reg_x10000 == 0xFFFF) {
+        OLED_ShowString(0, 2, "No DUT!", 16);
+        OLED_ShowString(0, 4, "Check Connect", 16);
+    } else if (s_auto_test_reg_x10000 == 0xFFFE) {
+        OLED_ShowString(0, 2, "Protection!", 16);
+        OLED_ShowString(0, 4, "OVP/OTP Trip", 16);
+    } else {
+        sprintf((char*)disp_buf, "Vnl:%2d.%03dV",
+            (int)(s_auto_test_noload_voltage_mV / 1000),
+            (int)(s_auto_test_noload_voltage_mV % 1000));
+        OLED_ShowString(0, 2, disp_buf, 16);
+        sprintf((char*)disp_buf, "Vfl:%2d.%03dV",
+            (int)(s_auto_test_load_voltage_mV / 1000),
+            (int)(s_auto_test_load_voltage_mV % 1000));
+        OLED_ShowString(0, 4, disp_buf, 16);
+        val = s_auto_test_reg_x10000;
+        sprintf((char*)disp_buf, "Reg:%3d.%02d%%",
+            (int)(val / 100),
+            (int)(val % 100));
+        OLED_ShowString(0, 6, disp_buf, 16);
+    }
+    // OLED_ShowString(0, 7, "MODE:Re-test", 12);
+}
+
+static void AutoTest_Tick(void)
+{
+    uint32_t diff;
+
+    switch (s_auto_test_sub_state) {
+
+    case AUTO_TEST_SUB_IDLE:
+        break;
+
+    case AUTO_TEST_SUB_MEASURE_NOLOAD:
+        s_auto_test_tick_count++;
+
+        // 实时更新显示电压
+        sprintf((char*)disp_buf, "Vnl:%2d.%03dV",
+            (int)(sys_ui.ui_data.real_time_voltage_mV / 1000),
+            (int)(sys_ui.ui_data.real_time_voltage_mV % 1000));
+        OLED_ShowString(0, 2, disp_buf, 16);
+
+        // 最后500ms（tick 10-14）累加5个采样值
+        if (s_auto_test_tick_count >= 10 && s_auto_test_tick_count < 15) {
+            s_auto_test_sum_mV += sys_ui.ui_data.real_time_voltage_mV;
+            s_auto_test_sample_cnt++;
+        }
+
+        // 1500ms后计算平均空载电压
+        if (s_auto_test_tick_count >= 15) {
+            if (s_auto_test_sample_cnt > 0) {
+                s_auto_test_noload_voltage_mV = s_auto_test_sum_mV / s_auto_test_sample_cnt;
+            } else {
+                s_auto_test_noload_voltage_mV = sys_ui.ui_data.real_time_voltage_mV;
+            }
+
+            // 无DUT检测
+            if (s_auto_test_noload_voltage_mV < 100) {
+                s_auto_test_reg_x10000 = 0xFFFF;
+                s_auto_test_sub_state = AUTO_TEST_SUB_RESULT;
+                sys_ui.is_changed = 1;
+                break;
+            }
+
+            // 保存用户设置
+            s_auto_test_saved_op_mode = (uint8_t)sys_ui.ui_data.op_mode;
+            s_auto_test_saved_current_mA = sys_ui.ui_data.setting_current_mA;
+
+            // 切换到CC模式并设置测试电流
+            sys_ui.ui_data.op_mode = OP_MODE_CC;
+            sys_ui.ui_data.setting_current_mA = s_auto_test_current_mA;
+            Current_Control_SetTarget(s_auto_test_current_mA);
+
+            // 打开输出
+            OUTPUT_EN_ON();
+            LED_OUT_ON();
+
+            s_auto_test_sub_state = AUTO_TEST_SUB_MEASURE_LOAD;
+            s_auto_test_tick_count = 0;
+            s_auto_test_sum_mV = 0;
+            s_auto_test_sample_cnt = 0;
+            sys_ui.is_changed = 1;
+        }
+        break;
+
+    case AUTO_TEST_SUB_MEASURE_LOAD:
+        // 检查保护触发
+        if (sys_ui.ui_data.is_over_voltage || sys_ui.ui_data.is_over_temperature) {
+            OUTPUT_EN_OFF();
+            LED_OUT_OFF();
+            Current_Control_ResetDuty();
+            sys_ui.ui_data.op_mode = (OpMode_e)s_auto_test_saved_op_mode;
+            sys_ui.ui_data.setting_current_mA = s_auto_test_saved_current_mA;
+            s_auto_test_reg_x10000 = 0xFFFE;
+            sys_ui.ui_data.auto_test_running = 0;
+            s_auto_test_sub_state = AUTO_TEST_SUB_RESULT;
+            sys_ui.is_changed = 1;
+            break;
+        }
+
+        s_auto_test_tick_count++;
+
+        // 实时更新显示
+        sprintf((char*)disp_buf, "Vfl:%2d.%03dV",
+            (int)(sys_ui.ui_data.real_time_voltage_mV / 1000),
+            (int)(sys_ui.ui_data.real_time_voltage_mV % 1000));
+        OLED_ShowString(0, 2, disp_buf, 16);
+
+        sprintf((char*)disp_buf, "I=%4dmA", (int)s_auto_test_current_mA);
+        OLED_ShowString(0, 4, disp_buf, 16);
+
+        // 最后500ms（tick 25-29）累加5个采样值
+        if (s_auto_test_tick_count >= 45 && s_auto_test_tick_count < 50) {
+            s_auto_test_sum_mV += sys_ui.ui_data.real_time_voltage_mV;
+            s_auto_test_sample_cnt++;
+        }
+
+        // 8000ms后计算平均带载电压
+        if (s_auto_test_tick_count >= 80) {
+            if (s_auto_test_sample_cnt > 0) {
+                s_auto_test_load_voltage_mV = s_auto_test_sum_mV / s_auto_test_sample_cnt;
+            } else {
+                s_auto_test_load_voltage_mV = sys_ui.ui_data.real_time_voltage_mV;
+            }
+
+            // 计算调整率（扣除采样电阻压降：V = I x 0.1ohm）
+            if (s_auto_test_noload_voltage_mV > 0) {
+                diff = (uint32_t)s_auto_test_noload_voltage_mV - s_auto_test_load_voltage_mV;
+                // 减去采样电阻上的 I x R 压降，还原真实的 DUT 负载调整率
+                if (diff > (uint32_t)s_auto_test_current_mA * R_SENSEx100 / 100) {
+                    diff -= (uint32_t)s_auto_test_current_mA * R_SENSEx100 / 100;
+                } else {
+                    diff = 0;
+                }
+                s_auto_test_reg_x10000 = (uint16_t)(diff * 10000 / s_auto_test_noload_voltage_mV);
+            } else {
+                s_auto_test_reg_x10000 = 0;
+            }
+
+            // 清理：关闭输出，恢复设置
+            OUTPUT_EN_OFF();
+            LED_OUT_OFF();
+            Current_Control_ResetDuty();
+            sys_ui.ui_data.op_mode = (OpMode_e)s_auto_test_saved_op_mode;
+            sys_ui.ui_data.setting_current_mA = s_auto_test_saved_current_mA;
+            sys_ui.ui_data.auto_test_running = 0;
+
+            s_auto_test_sub_state = AUTO_TEST_SUB_RESULT;
+            sys_ui.is_changed = 1;
+        }
+        break;
+
+    case AUTO_TEST_SUB_RESULT:
+        break;
+    }
+}
+
 /*
  * @brief   UI 显示主任务
  */
@@ -365,7 +556,25 @@ void UI_Task(void)
                 break;
             
             case SYS_STATE_AUTO_TEST_PAGE:
-                // 暂时没用
+                // 根据当前子状态重绘（不重置状态，避免破坏 AutoTest_Tick 状态机）
+                switch (s_auto_test_sub_state) {
+                case AUTO_TEST_SUB_IDLE:
+                    DrawAutoTestIdle();
+                    break;
+                case AUTO_TEST_SUB_MEASURE_NOLOAD:
+                    OLED_Clear(0);
+                    OLED_ShowString(0, 0, "Step 1/2: NoLoad", 16);
+                    OLED_ShowString(0, 6, "Measuring...", 16);
+                    break;
+                case AUTO_TEST_SUB_MEASURE_LOAD:
+                    OLED_Clear(0);
+                    OLED_ShowString(0, 0, "Step 2/2: Loading", 16);
+                    OLED_ShowString(0, 6, "Stabilize...", 16);
+                    break;
+                case AUTO_TEST_SUB_RESULT:
+                    DrawAutoTestResult();
+                    break;
+                }
                 break;
             
             case SYS_STATE_ALARM_OVERLAY:
@@ -490,7 +699,7 @@ void UI_Task(void)
             break;
 
         case SYS_STATE_AUTO_TEST_PAGE:
-                // 自动测试页可以根据测试进度动态更新显示内容
+                AutoTest_Tick();
             break;
 
         case SYS_STATE_ALARM_OVERLAY:
@@ -533,6 +742,10 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
                             s_edit_sel_index = (uint8_t)sys_ui.ui_data.op_mode;
                             DrawModeSelect();
                         } else if (s_setting_index == MENU_ITEM_COUNT - 1) {
+                            // Load Reg: 跳转到负载调整率测试页
+                            sys_ui.current_page = SYS_STATE_AUTO_TEST_PAGE;
+                            sys_ui.is_changed = 1;
+                        } else if (s_setting_index == 7) {
                             // 恢复出厂设置：进入确认
                             s_setting_sub_state = SETTING_SUB_FACTORY_CONFIRM;
                             DrawFactoryResetConfirm();
@@ -570,10 +783,22 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
                     }
                     break;  // 不执行下面的页面切换
                 }
+                // 自动测试页内部 MODE 处理
+                if (sys_ui.current_page == SYS_STATE_AUTO_TEST_PAGE)
+                {
+                    if (s_auto_test_sub_state == AUTO_TEST_SUB_RESULT) {
+                        s_auto_test_sub_state = AUTO_TEST_SUB_IDLE;
+                        sys_ui.ui_data.auto_test_running = 0;
+                        sys_ui.is_changed = 1;
+                        break;
+                    } else if (s_auto_test_sub_state != AUTO_TEST_SUB_IDLE) {
+                        break;
+                    }
+                }
                 // 按下 MODE 键（短按）：切换页面
                 sys_ui.current_page = sys_ui.current_page + 1;
-                if (sys_ui.current_page > SYS_STATE_SETTING_PAGE) {
-                    sys_ui.current_page = SYS_STATE_START_PAGE; // 循环回第一个页面
+                if (sys_ui.current_page >= SYS_STATE_ALARM_OVERLAY) {
+                    sys_ui.current_page = SYS_STATE_START_PAGE; // 循环回第一个页面，跳过报警覆盖页
                 }
                 sys_ui.is_changed = 1; // 标记状态改变，触发 UI_Task 清屏重绘
                 break;
@@ -632,6 +857,15 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
                             if (sys_ui.ui_data.setting_power_mW <= 30000 - 100)
                                 sys_ui.ui_data.setting_power_mW += 100;
                             break;
+                        }
+                        break;
+                    case SYS_STATE_AUTO_TEST_PAGE:
+                        if (s_auto_test_sub_state == AUTO_TEST_SUB_IDLE) {
+                            if (s_auto_test_current_mA <= (1000 - 10)) {
+                                s_auto_test_current_mA += 10;
+                            }
+                            sprintf((char*)disp_buf, "I_test:%4dmA", (int)s_auto_test_current_mA);
+                            OLED_ShowString(0, 2, disp_buf, 16);
                         }
                         break;
                     default:
@@ -699,6 +933,17 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
                             break;
                         }
                         break;
+                    case SYS_STATE_AUTO_TEST_PAGE:
+                        if (s_auto_test_sub_state == AUTO_TEST_SUB_IDLE) {
+                            if (s_auto_test_current_mA >= 10) {
+                                s_auto_test_current_mA -= 10;
+                            } else {
+                                s_auto_test_current_mA = 0;
+                            }
+                            sprintf((char*)disp_buf, "I_test:%4dmA", (int)s_auto_test_current_mA);
+                            OLED_ShowString(0, 2, disp_buf, 16);
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -717,6 +962,23 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
                         sys_ui.is_changed = 1;
                     } else if (s_setting_sub_state == SETTING_SUB_FACTORY_CONFIRM) {
                         s_setting_sub_state = SETTING_SUB_LIST;
+                        sys_ui.is_changed = 1;
+                    }
+                } else if (sys_ui.current_page == SYS_STATE_AUTO_TEST_PAGE) {
+                    // 自动测试页：IDLE状态启动测试
+                    if (s_auto_test_sub_state == AUTO_TEST_SUB_IDLE) {
+                        // 立即进入测试模式并关闭风扇，给电源足够时间稳定
+                        OUTPUT_EN_OFF();
+                        LED_OUT_OFF();
+                        Current_Control_ResetDuty();
+                        sys_ui.ui_data.auto_test_running = 1;
+                        Fan_SetDuty(0);
+                        s_auto_test_sub_state = AUTO_TEST_SUB_MEASURE_NOLOAD;
+                        s_auto_test_tick_count = 0;
+                        s_auto_test_noload_voltage_mV = 0;
+                        s_auto_test_load_voltage_mV = 0;
+                        s_auto_test_sum_mV = 0;
+                        s_auto_test_sample_cnt = 0;
                         sys_ui.is_changed = 1;
                     }
                 } else {
@@ -841,12 +1103,25 @@ void Key_Event_Handler(KeyID_e key_id, KeyEvent_e event)
             } else if (sys_ui.current_page == SYS_STATE_MONITOR_PAGE) {
                 // 长按 MODE 在监视页循环切换 CC→CR→CP
                 sys_ui.ui_data.op_mode = (sys_ui.ui_data.op_mode + 1) % 3;
-                s_mode_long_handled = 1; // 标记，避免松开时触发页面切换
+                s_mode_long_handled = 1;
                 printf("Mode: %s\n",
                     sys_ui.ui_data.op_mode == OP_MODE_CC ? "CC" :
                     sys_ui.ui_data.op_mode == OP_MODE_CR ? "CR" : "CP");
-                OUTPUT_EN_OFF(); // 长按 MODE 键时先关闭输出，避免切换模式时的瞬间过流过压
-                LED_OUT_OFF(); // 同步关闭LED指示
+                OUTPUT_EN_OFF();
+                LED_OUT_OFF();
+            } else if (sys_ui.current_page == SYS_STATE_AUTO_TEST_PAGE) {
+                if (s_auto_test_sub_state != AUTO_TEST_SUB_IDLE &&
+                    s_auto_test_sub_state != AUTO_TEST_SUB_RESULT) {
+                    OUTPUT_EN_OFF();
+                    LED_OUT_OFF();
+                    Current_Control_ResetDuty();
+                    sys_ui.ui_data.op_mode = (OpMode_e)s_auto_test_saved_op_mode;
+                    sys_ui.ui_data.setting_current_mA = s_auto_test_saved_current_mA;
+                    s_auto_test_sub_state = AUTO_TEST_SUB_IDLE;
+                    sys_ui.ui_data.auto_test_running = 0;
+                    sys_ui.is_changed = 1;
+                }
+                s_mode_long_handled = 1;
             }
             break;
         default:

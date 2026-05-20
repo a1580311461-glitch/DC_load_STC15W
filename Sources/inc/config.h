@@ -1,7 +1,7 @@
 //<<AICUBE_USER_HEADER_REMARK_BEGIN>>
 ////////////////////////////////////////
-// 锟节达拷锟斤拷锟斤拷锟矫伙拷锟侥硷拷头说锟斤拷锟斤拷息  
-// 锟侥硷拷锟斤拷锟斤拷: config.h
+// 在此添加用户文件头说明信息
+// 文件名称: config.h
 ////////////////////////////////////////
 //<<AICUBE_USER_HEADER_REMARK_END>>
 
@@ -11,7 +11,7 @@
 
 
 //<<AICUBE_USER_DEFINE_BEGIN>>
-// 锟节达拷锟斤拷锟斤拷锟矫伙拷锟疥定锟斤拷  
+// 在此添加用户宏定义
 
 /* 指示灯控制宏 */
 #define LED_ERR_ON()       do { P26 = 0; } while(0) // 错误指示灯亮
@@ -60,7 +60,7 @@ extern unsigned char output_en_state;
 
 
 //<<AICUBE_USER_INCLUDE_BEGIN>>
-// 锟节达拷锟斤拷锟斤拷锟矫伙拷头锟侥硷拷锟斤拷锟斤拷
+// 在此添加用户头文件包含
 
 #include "key.h"
 #include "oled.h"
@@ -112,7 +112,7 @@ void delay_ms(uint16_t ms);
 
 
 //<<AICUBE_USER_EXTERNAL_DECLARE_BEGIN>>
-// 锟节达拷锟斤拷锟斤拷锟矫伙拷锟解部锟斤拷锟斤拷锟斤拷锟解部锟斤拷锟斤拷锟斤拷锟斤拷  
+// 在此添加用户外部函数和外部变量声明
 //<<AICUBE_USER_EXTERNAL_DECLARE_END>>
 
 

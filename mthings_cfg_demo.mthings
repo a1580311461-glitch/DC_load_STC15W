@@ -5,6 +5,9 @@
 		<COM Name="COM11" Remarks="PL2303" Baund="9600" Parity="0" StopBit="0" DataBit="0" FlowCtrl="0" DTR="0" TransMode="0" CharType="0" BreakTime="10" />
 		<COM Name="COM4" Remarks="" Baund="9600" Parity="0" StopBit="0" DataBit="0" FlowCtrl="0" DTR="0" TransMode="0" CharType="0" BreakTime="10" />
 		<COM Name="COM12" Remarks="" Baund="9600" Parity="0" StopBit="0" DataBit="0" FlowCtrl="0" DTR="0" TransMode="0" CharType="0" BreakTime="10" />
+		<COM Name="COM13" Remarks="" Baund="9600" Parity="0" StopBit="0" DataBit="0" FlowCtrl="0" DTR="0" TransMode="0" CharType="0" BreakTime="10" />
+		<COM Name="COM14" Remarks="" Baund="9600" Parity="0" StopBit="0" DataBit="0" FlowCtrl="0" DTR="0" TransMode="0" CharType="0" BreakTime="10" />
+		<COM Name="COM15" Remarks="" Baund="9600" Parity="0" StopBit="0" DataBit="0" FlowCtrl="0" DTR="0" TransMode="0" CharType="0" BreakTime="10" />
 	</PORT_LIST>
 	<SIGNT SYS_DATA="" ALARM="" HISDATA="" />
 	<MQTT />
@@ -16,41 +19,77 @@
 	<SYS_DATA>
 		<PAGE ID="1" Name="HOME" width="1920" hight="1080" BackColor="#FFFFFFFF" PicPath="">
 			<CHIPV ID="1" Width="300" Height="50" PosX="935" PosY="121" />
-			<CHIPV ID="2" Width="100" Height="300" PosX="477" PosY="620" />
-			<CHIPV ID="4" Width="200" Height="200" PosX="413" PosY="386" />
-			<CHIPV ID="5" Width="200" Height="200" PosX="410" PosY="163" />
-			<CHIPV ID="6" Width="200" Height="50" PosX="1008" PosY="514" />
-			<CHIPV ID="7" Width="100" Height="50" PosX="994" PosY="803" />
-			<CHIPV ID="8" Width="200" Height="100" PosX="986" PosY="231" />
-			<CHIPV ID="9" Width="50" Height="50" PosX="1118" PosY="804" />
+			<CHIPV ID="2" Width="100" Height="300" PosX="431" PosY="598" />
+			<CHIPV ID="4" Width="200" Height="200" PosX="388" PosY="378" />
+			<CHIPV ID="5" Width="200" Height="200" PosX="384" PosY="156" />
 			<CHIPV ID="10" Width="667" Height="60" PosX="530" PosY="51" />
+			<CHIPV ID="11" Width="200" Height="50" PosX="708" PosY="240" />
+			<CHIPV ID="12" Width="200" Height="50" PosX="713" PosY="323" />
+			<CHIPV ID="13" Width="200" Height="50" PosX="714" PosY="401" />
+			<CHIPV ID="15" Width="200" Height="50" PosX="969" PosY="238" />
+			<CHIPV ID="16" Width="200" Height="50" PosX="974" PosY="326" />
+			<CHIPV ID="17" Width="200" Height="50" PosX="967" PosY="405" />
+			<CHIPV ID="18" Width="383" Height="103" PosX="623" PosY="495" />
+			<CHIPV ID="20" Width="601" Height="272" PosX="663" PosY="649" />
+			<CHIPV ID="21" Width="475" Height="71" PosX="1054" PosY="508" />
+			<CHIPV ID="22" Width="100" Height="50" PosX="1311" PosY="519" />
+			<CHIPV ID="23" Width="50" Height="50" PosX="1425" PosY="520" />
 		</PAGE>
 		<CHIPV ID="1" lock="0" Type="5" Intvl="10" ExtroPara="tagcolor::#FF000000;stt::0;asyn_t::OFF;synt_intvl::1;" />
 		<CHIPV ID="2" lock="0" Type="13" Intvl="10" ExtroPara="tagcolor::#FF000000;max::100;min::-30;preci::0;default::0;">
 			<DeviceData DeviceID="1" DataID="11" ExtroPara="" />
 		</CHIPV>
-		<CHIPV ID="4" lock="0" Type="6" Intvl="10" ExtroPara="tagcolor::#FF000000;uint::A;preci::0;max::4;min::0;default::0;">
+		<CHIPV ID="4" lock="0" Type="6" Intvl="10" ExtroPara="tagcolor::#FF000000;uint::A;preci::3;max::4;min::0;default::0;">
 			<DeviceData DeviceID="1" DataID="10" ExtroPara="" />
 		</CHIPV>
-		<CHIPV ID="5" lock="0" Type="7" Intvl="10" ExtroPara="tagcolor::#FF000000;uint::V;preci::0;max::10;min::0;default::0;">
+		<CHIPV ID="5" lock="0" Type="7" Intvl="10" ExtroPara="tagcolor::#FF000000;uint::V;preci::3;max::10;min::0;default::0;">
 			<DeviceData DeviceID="1" DataID="9" ExtroPara="" />
 		</CHIPV>
-		<CHIPV ID="6" lock="0" Type="31" Intvl="10" ExtroPara="tagcolor::#FFFFFFFF;backcolor::#FF28A745;fsize::20;shabl::ON;">
-			<DeviceData DeviceID="1" DataID="1" ExtroPara="" />
-		</CHIPV>
-		<CHIPV ID="7" lock="0" Type="11" Intvl="10" ExtroPara="openV::1;closeV::0;openN::;closeN::;ro::ON;default::0;">
-			<DeviceData DeviceID="1" DataID="12" ExtroPara="" />
-		</CHIPV>
-		<CHIPV ID="8" lock="0" Type="36" Intvl="10" ExtroPara="bodercolor::#FFFFFFFF;boderwidth::0;rd_b::10;c_top::#007F7E;c_bom::#333365;tlcolor::#FFFFFFFF;vlcolor::#FFFFFFFF;fs_t::20;fs_v::20;tlname::;uint::;" />
-		<CHIPV ID="9" lock="0" Type="24" Intvl="10" ExtroPara="layout::0;openV::1;closeV::0;openC::#FFFF0033;closeC::#FFCCCCCC;default::0;shpsq::OFF;openSk::OFF;shrkHz::2;tagshow::OFF;tagcolor::#FF000000;fsize::15;">
-			<DeviceData DeviceID="1" DataID="12" ExtroPara="" />
-		</CHIPV>
 		<CHIPV ID="10" lock="0" Type="18" Intvl="10" ExtroPara="text::直流电子负载ModBus组态软件 V1.0;fsize::40;t_bd::ON;color::#FF000000;backcolor::#00000000;" />
+		<CHIPV ID="11" lock="0" Type="15" Intvl="10" ExtroPara="bodercolor::#FFCCCCCC;boderwidth::2;rd_b::2;backcolor::#ffa3cb38;shtl::ON;ro::ON;fsize::20;tlcolor::#FF000000;tpos::3;vpos::5;vlcolor::#FF000000;default::0;uint::mA;">
+			<DeviceData DeviceID="1" DataID="3" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="12" lock="0" Type="15" Intvl="10" ExtroPara="bodercolor::#FFCCCCCC;boderwidth::2;rd_b::2;backcolor::#ffa3cb38;shtl::ON;ro::ON;fsize::20;tlcolor::#FF000000;tpos::3;vpos::5;vlcolor::#FF000000;default::0;uint::mΩ;">
+			<DeviceData DeviceID="1" DataID="4" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="13" lock="0" Type="15" Intvl="10" ExtroPara="bodercolor::#FFCCCCCC;boderwidth::2;rd_b::2;backcolor::#ffa3cb38;shtl::ON;ro::ON;fsize::20;tlcolor::#FF000000;tpos::3;vpos::5;vlcolor::#FF000000;default::0;uint::mW;">
+			<DeviceData DeviceID="1" DataID="5" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="15" lock="0" Type="15" Intvl="10" ExtroPara="bodercolor::#ff000000;boderwidth::2;rd_b::2;backcolor::#ff00ffff;shtl::ON;ro::ON;fsize::20;tlcolor::#FF000000;tpos::3;vpos::5;vlcolor::#FF000000;default::0;uint::V;">
+			<DeviceData DeviceID="1" DataID="9" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="16" lock="0" Type="15" Intvl="10" ExtroPara="bodercolor::#ff000000;boderwidth::2;rd_b::2;backcolor::#ff00ffff;shtl::ON;ro::ON;fsize::20;tlcolor::#FF000000;tpos::3;vpos::5;vlcolor::#FF000000;default::0;uint::A;">
+			<DeviceData DeviceID="1" DataID="10" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="17" lock="0" Type="15" Intvl="10" ExtroPara="bodercolor::#ff000000;boderwidth::2;rd_b::2;backcolor::#ff00ffff;shtl::ON;ro::ON;fsize::20;tlcolor::#FF000000;tpos::3;vpos::5;vlcolor::#FF000000;default::0;uint::℃;">
+			<DeviceData DeviceID="1" DataID="11" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="18" lock="0" Type="15" Intvl="10" ExtroPara="bodercolor::#FFCCCCCC;boderwidth::2;rd_b::2;backcolor::#ff00a73e;shtl::ON;ro::ON;fsize::20;tlcolor::#ff000000;tpos::3;vpos::5;vlcolor::#FF000000;default::0;uint::;">
+			<DeviceData DeviceID="1" DataID="2" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="20" lock="0" Type="0" Intvl="10" ExtroPara="vcolmnHead::ON;uint::ON;vrange::OFF;tlcolor::#FF000000;vlcolor::#FF000000;gdcolor::#FFCFCCC9;backcolor::#ff74b9ff;">
+			<DeviceData DeviceID="1" DataID="1" ExtroPara="" />
+			<DeviceData DeviceID="1" DataID="6" ExtroPara="" />
+			<DeviceData DeviceID="1" DataID="7" ExtroPara="" />
+			<DeviceData DeviceID="1" DataID="8" ExtroPara="" />
+			<DeviceData DeviceID="1" DataID="13" ExtroPara="" />
+			<DeviceData DeviceID="1" DataID="14" ExtroPara="" />
+			<DeviceData DeviceID="1" DataID="15" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="21" lock="0" Type="15" Intvl="10" ExtroPara="bodercolor::#FFCCCCCC;boderwidth::2;rd_b::2;backcolor::#FFEEEEEE;shtl::ON;ro::ON;fsize::20;tlcolor::#FF000000;tpos::3;vpos::5;vlcolor::#FF000000;default::0;uint::;">
+			<DeviceData DeviceID="1" DataID="12" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="22" lock="0" Type="11" Intvl="10" ExtroPara="openV::1;closeV::0;openN::;closeN::;ro::ON;default::0;">
+			<DeviceData DeviceID="1" DataID="12" ExtroPara="" />
+		</CHIPV>
+		<CHIPV ID="23" lock="0" Type="24" Intvl="10" ExtroPara="layout::0;openV::1;closeV::0;openC::#ff00a73e;closeC::#FFCCCCCC;default::0;shpsq::OFF;openSk::OFF;shrkHz::2;tagshow::OFF;tagcolor::#FF000000;fsize::15;">
+			<DeviceData DeviceID="1" DataID="12" ExtroPara="" />
+		</CHIPV>
 	</SYS_DATA>
 	<DEVICE_LIST>
 		<DEVICE ID="1" Name="[M]电子直流负载-021" DeviceType="1" BindMode="0" BindDeviceID="0" Addr="21" mr_reg="125" mr_bit="2000" p_invl="0" btime="0" AddrUIMode="0" CRCByteOder="1" BlockBitOder="0" AddrOffset="0" PackWay="1" BitGap="0" RegGap="5" OneReg10="0" OneCoil0F="0" BCast1="0" BCast2="0" IsBCDevice="0" BathReadMode="0" cGp="">
 			<PORTS>
-				<port Name="COM12" />
+				<port Name="COM15" />
 			</PORTS>
 			<GROUPS />
 			<SELF_LIST />
@@ -73,13 +112,13 @@
 					<ENUMS />
 					<GROUPS />
 				</DATA>
-				<DATA ID="4" Name="设定电阻" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="mΩ" ShowType="0" Addr="3" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="4000" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+				<DATA ID="4" Name="设定电阻" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="mΩ" ShowType="0" Addr="3" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="10000" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
 					<TIMEOUT Time="2000" ResendCount="0" />
 					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
 					<ENUMS />
 					<GROUPS />
 				</DATA>
-				<DATA ID="5" Name="设定功率" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="mW" ShowType="0" Addr="4" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="2500" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
+				<DATA ID="5" Name="设定功率" BLOCK="2" PrtcTYPE="1" PointNum="0" Unit="mW" ShowType="0" Addr="4" Gain="1" Offset="0" Size="1" BitOffset="0" BitNum="16" Range="--" CmdValue="5000" Color="" ByteOder="0" WordOder="1" IntervalTime="0" IsBRead="1">
 					<TIMEOUT Time="2000" ResendCount="0" />
 					<VALUE Stategy="0" TimeBngrWay="0" Coef_a="0" Coef_b="0" Coef_c="0" Coef_d="0" Coef_e="0" ResetStep="0" XInvl="1000" MaxRadom="0" MinRadom="0" MaxValue="0" MinValue="0" datarry="" BindDeviceID="0" BindDataID="0" />
 					<ENUMS />

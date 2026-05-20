@@ -212,6 +212,14 @@ void Control_Protect(void)
     }
 
     // === 风扇控制：温度/电流联合启停 + 动态调速（迟滞防抖） ===
+    // 负载调整率测试时关闭风扇，避免PWM噪声干扰ADC测量精度
+    if (sys_ui.ui_data.auto_test_running) {
+        if (s_fan_active) {
+            s_fan_active = 0;
+            Fan_SetDuty(0);
+        }
+        return;
+    }
     #define FAN_ON_TEMP_C       35      // 风扇启动温度阈值 (°C)
     #define FAN_OFF_TEMP_C      30      // 风扇关断温度迟滞 (°C)
     #define FAN_ON_CURRENT_MA   1000    // 风扇启动电流阈值 (mA)

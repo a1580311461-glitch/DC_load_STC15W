@@ -1,7 +1,7 @@
 #ifndef __OLEDFONT_H
 #define __OLEDFONT_H
 
-// ���ֵ���������
+// 中文字体枚举类型
 typedef enum {
     zhi = 0,  // 'ֱ直'
     liu = 1,  // '流'

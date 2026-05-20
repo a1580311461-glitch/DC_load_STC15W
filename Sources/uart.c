@@ -1,8 +1,8 @@
 //<<AICUBE_USER_HEADER_REMARK_BEGIN>>
 ////////////////////////////////////////
-// 在此添加用户文件头说明信息  
+// 在此添加用户文件头说明信息
 // 文件名称: uart.c
-// 文件描述: 
+// 文件描述:
 // 文件版本: V1.0
 // 修改记录:
 //   1. (2026-04-16) 创建文件
@@ -14,12 +14,12 @@
 
 
 //<<AICUBE_USER_INCLUDE_BEGIN>>
-// 在此添加用户头文件包含  
+// 在此添加用户头文件包含
 //<<AICUBE_USER_INCLUDE_END>>
 
 
 //<<AICUBE_USER_GLOBAL_DEFINE_BEGIN>>
-// 在此添加用户全局变量定义、用户宏定义以及函数声明  
+// 在此添加用户全局变量定义、用户宏定义以及函数声明
 #define UART3_SetIntPriority(n)  // 定义一个空宏来消除AICube底库缺失造成的报错
 //<<AICUBE_USER_GLOBAL_DEFINE_END>>
 

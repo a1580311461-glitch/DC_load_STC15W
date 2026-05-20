@@ -1,8 +1,8 @@
 //<<AICUBE_USER_HEADER_REMARK_BEGIN>>
 ////////////////////////////////////////
-// 在此添加用户文件头说明信息  
+// 在此添加用户文件头说明信息
 // 文件名称: adc.c
-// 文件描述: 
+// 文件描述:
 // 文件版本: V1.0
 // 修改记录:
 //   1. (2026-04-16) 创建文件
@@ -14,7 +14,7 @@
 
 
 //<<AICUBE_USER_INCLUDE_BEGIN>>
-// 在此添加用户头文件包含  
+// 在此添加用户头文件包含
 //<<AICUBE_USER_INCLUDE_END>>
 
 
@@ -42,7 +42,7 @@ void ADC_Init(void)
     ADC_Enable();                       //使能ADC功能
 
     //<<AICUBE_USER_ADC_INITIAL_BEGIN>>
-    // 在此添加用户初始化代码  
+    // 在此添加用户初始化代码
     //<<AICUBE_USER_ADC_INITIAL_END>>
 }
 
@@ -54,10 +54,17 @@ void ADC_Init(void)
 uint16_t ADC_Convert(uint8_t ch)
 {
     uint16_t res;                       //定义保存ADC结果的变量
+    uint16_t timeout;                   //超时计数器
 
     ADC_ActiveChannel(ch);              //选择ADC通道
     ADC_Start();                        //开始ADC转换
-    while (!ADC_CheckFlag());           //等待ADC转换完成
+    timeout = 0;
+    while (!ADC_CheckFlag()) {
+        if (++timeout > 30000) {        //超时约20ms（远超正常转换时间~160us）
+            ADC_ClearFlag();
+            return 0;                   //超时返回0，避免卡死
+        }
+    }
     ADC_ClearFlag();                    //清除ADC转换完成中断标志
     res = ADC_ReadResult();             //读取ADC转换结果
 
@@ -67,7 +74,7 @@ uint16_t ADC_Convert(uint8_t ch)
 
 
 //<<AICUBE_USER_FUNCTION_IMPLEMENT_BEGIN>>
-// 在此添加用户函数实现代码  
+// 在此添加用户函数实现代码
 
 uint16_t ADC_Get_Vcc(void){
     uint32_t sum_gap = 0;

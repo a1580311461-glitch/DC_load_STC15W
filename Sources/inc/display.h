@@ -27,6 +27,14 @@ typedef enum {
     SETTING_SUB_FACTORY_CONFIRM    // 恢复出厂确认
 } SettingSubState_e;
 
+// 负载调整率测试子状态
+typedef enum {
+    AUTO_TEST_SUB_IDLE = 0,             // 待机/参数设置
+    AUTO_TEST_SUB_MEASURE_NOLOAD,       // 空载测量中
+    AUTO_TEST_SUB_MEASURE_LOAD,         // 带载测量中
+    AUTO_TEST_SUB_RESULT,               // 显示结果
+} AutoTestSubState_e;
+
 typedef struct {
     uint16_t real_time_voltage_mV;         // 实时电压值，单位毫伏
     uint16_t real_time_current_mA;         // 实时电流值，单位毫安
@@ -42,6 +50,7 @@ typedef struct {
     uint8_t is_over_voltage;                     // 过压报警标志
     uint8_t is_over_temperature;                 // 过温报警标志
     uint16_t boot_count;                         // 启动次数
+    uint8_t auto_test_running;                   // 负载调整率测试运行中（用于抑制风扇噪声）
 } UIData_t;
 
 typedef struct {

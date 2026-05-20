@@ -1,11 +1,11 @@
 //<<AICUBE_USER_HEADER_REMARK_BEGIN>>
 ////////////////////////////////////////
-// 锟节达拷锟斤拷锟斤拷锟矫伙拷锟侥硷拷头说锟斤拷锟斤拷息  
-// 锟侥硷拷锟斤拷锟斤拷: main.c
-// 锟侥硷拷锟斤拷锟斤拷: 
-// 锟侥硷拷锟芥本: V1.0
-// 锟睫改硷拷录:
-//   1. (2026-04-16) 锟斤拷锟斤拷锟侥硷拷
+// 在此添加用户文件头说明信息
+// 文件名称: main.c
+// 文件描述:
+// 文件版本: V1.0
+// 修改记录:
+//   1. (2026-04-16) 创建文件
 ////////////////////////////////////////
 //<<AICUBE_USER_HEADER_REMARK_END>>
 
@@ -19,10 +19,10 @@
 
 
 //<<AICUBE_USER_GLOBAL_DEFINE_BEGIN>>
-// 锟节达拷锟斤拷锟斤拷锟矫伙拷全锟街憋拷锟斤拷锟斤拷锟藉、锟矫伙拷锟疥定锟斤拷锟皆硷拷锟斤拷锟斤拷锟斤拷锟斤拷  
+// 在此添加用户全局变量定义、用户宏定义以及函数声明
 
-static uint16_t s_last_time_key = 0;  // 锟较达拷扫锟借按锟斤拷锟斤拷系统时锟戒，锟斤拷位为ms
-static uint16_t s_last_time_100ms = 0; // 锟较达拷执锟斤拷100ms锟斤拷锟斤拷锟较低呈憋拷洌?锟斤拷位为ms
+static uint16_t s_last_time_key = 0;  // 上次扫描按键时的系统时间，单位为ms
+static uint16_t s_last_time_100ms = 0; // 上次执行100ms任务时的系统时间，单位为ms
 static uint8_t s_eeprom_save_pending = 1; // EEPROM 延迟保存待处理标志
 uint16_t current_time;
 
@@ -38,19 +38,19 @@ uint16_t current_time;
 void main(void)
 {
     //<<AICUBE_USER_MAIN_INITIAL_BEGIN>>
-    // 锟节达拷锟斤拷锟斤拷锟矫伙拷锟斤拷锟斤拷锟斤拷锟斤拷始锟斤拷锟斤拷锟斤拷  
+    // 在此添加用户初始化代码
     //<<AICUBE_USER_MAIN_INITIAL_END>>
 
     SYS_Init();
 
     //<<AICUBE_USER_MAIN_CODE_BEGIN>>
-    // 锟节达拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷一锟轿碉拷锟矫伙拷锟斤拷锟斤拷
+    // 这是一个一次性的用户初始化代码
     //<<AICUBE_USER_MAIN_CODE_END>>
 
     while (1)
     {
         //<<AICUBE_USER_MAIN_LOOP_BEGIN>>
-        // 锟节达拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟矫伙拷锟斤拷循锟斤拷锟斤拷锟斤拷  
+        // 在此添加用户主循环代码
         
         current_time = Get_SysTick(); // 获取系统运行时间，单位为ms
 
@@ -125,7 +125,7 @@ void SYS_Init(void)
     PWM_Init();                         //增强型PWM初始化
 
     //<<AICUBE_USER_INITIAL_CODE_BEGIN>>
-    // 锟节达拷锟斤拷锟斤拷锟矫伙拷锟斤拷始锟斤拷锟斤拷锟斤拷  
+    // 在此添加用户初始化代码
 	
     Current_Control_Init();                    // 初始化电流控制模块
 
@@ -180,7 +180,7 @@ void delay_ms(uint16_t ms)
 
 
 //<<AICUBE_USER_FUNCTION_IMPLEMENT_BEGIN>>
-// 锟节达拷锟斤拷锟斤拷锟矫伙拷锟斤拷锟斤拷实锟街达拷锟斤拷  
+// 在此添加用户函数实现代码
 //<<AICUBE_USER_FUNCTION_IMPLEMENT_END>>
 
 
