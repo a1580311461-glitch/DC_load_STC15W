@@ -18,11 +18,11 @@
 	</ALARM_LIST>
 	<SYS_DATA>
 		<PAGE ID="1" Name="HOME" width="1920" hight="1080" BackColor="#FFFFFFFF" PicPath="">
-			<CHIPV ID="1" Width="300" Height="50" PosX="935" PosY="121" />
+			<CHIPV ID="1" Width="300" Height="50" PosX="947" PosY="106" />
 			<CHIPV ID="2" Width="100" Height="300" PosX="431" PosY="598" />
 			<CHIPV ID="4" Width="200" Height="200" PosX="388" PosY="378" />
 			<CHIPV ID="5" Width="200" Height="200" PosX="384" PosY="156" />
-			<CHIPV ID="10" Width="667" Height="60" PosX="530" PosY="51" />
+			<CHIPV ID="10" Width="667" Height="60" PosX="536" PosY="37" />
 			<CHIPV ID="11" Width="200" Height="50" PosX="708" PosY="240" />
 			<CHIPV ID="12" Width="200" Height="50" PosX="713" PosY="323" />
 			<CHIPV ID="13" Width="200" Height="50" PosX="714" PosY="401" />
@@ -34,6 +34,7 @@
 			<CHIPV ID="21" Width="475" Height="71" PosX="1054" PosY="508" />
 			<CHIPV ID="22" Width="100" Height="50" PosX="1311" PosY="519" />
 			<CHIPV ID="23" Width="50" Height="50" PosX="1425" PosY="520" />
+			<CHIPV ID="24" Width="462" Height="44" PosX="447" PosY="106" />
 		</PAGE>
 		<CHIPV ID="1" lock="0" Type="5" Intvl="10" ExtroPara="tagcolor::#FF000000;stt::0;asyn_t::OFF;synt_intvl::1;" />
 		<CHIPV ID="2" lock="0" Type="13" Intvl="10" ExtroPara="tagcolor::#FF000000;max::100;min::-30;preci::0;default::0;">
@@ -85,6 +86,7 @@
 		<CHIPV ID="23" lock="0" Type="24" Intvl="10" ExtroPara="layout::0;openV::1;closeV::0;openC::#ff00a73e;closeC::#FFCCCCCC;default::0;shpsq::OFF;openSk::OFF;shrkHz::2;tagshow::OFF;tagcolor::#FF000000;fsize::15;">
 			<DeviceData DeviceID="1" DataID="12" ExtroPara="" />
 		</CHIPV>
+		<CHIPV ID="24" lock="0" Type="18" Intvl="10" ExtroPara="text::傅倍梁 202331720521;fsize::40;t_bd::ON;color::#FF000000;backcolor::#00000000;" />
 	</SYS_DATA>
 	<DEVICE_LIST>
 		<DEVICE ID="1" Name="[M]电子直流负载-021" DeviceType="1" BindMode="0" BindDeviceID="0" Addr="21" mr_reg="125" mr_bit="2000" p_invl="0" btime="0" AddrUIMode="0" CRCByteOder="1" BlockBitOder="0" AddrOffset="0" PackWay="1" BitGap="0" RegGap="5" OneReg10="0" OneCoil0F="0" BCast1="0" BCast2="0" IsBCDevice="0" BathReadMode="0" cGp="">
